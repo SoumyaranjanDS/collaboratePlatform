@@ -12,8 +12,9 @@ export const chatSocket = (io) => {
       io.emit('online-users-list', Object.values(onlineUsers));
     });
 
+    // UPDATED: Added Pagination (limit and skip)
     socket.on('fetch-history', async (data) => {
-      const { sender, recipient } = data;
+      const { sender, recipient, skip = 0 } = data;
       let query = {};
       if (recipient) {
         query = {
@@ -25,8 +26,18 @@ export const chatSocket = (io) => {
       } else {
         query = { recipientName: null };
       }
-      const history = await Message.find(query).sort({ createdAt: 1 }).limit(100);
-      socket.emit('load-messages', history);
+
+      // Fetch 20 messages at a time, sorted by newest first
+      const history = await Message.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(20);
+
+      // Send back in chronological order
+      socket.emit('load-messages', { 
+        messages: history.reverse(), 
+        isMore: history.length === 20 
+      });
     });
 
     socket.on('send-message', async (data) => {
@@ -45,6 +56,32 @@ export const chatSocket = (io) => {
         socket.emit('message-received', newMessage);
       } else {
         io.emit('message-received', newMessage);
+      }
+    });
+
+    // NEW: Typing Indicators
+    socket.on('typing-start', (data) => {
+      const { sender, recipient } = data;
+      if (recipient) {
+        const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipient);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('user-typing', { username: sender, isTyping: true });
+        }
+      } else {
+        // Global typing could be noisy, but adding it for consistency
+        socket.broadcast.emit('user-typing', { username: sender, isTyping: true, isGlobal: true });
+      }
+    });
+
+    socket.on('typing-stop', (data) => {
+      const { recipient } = data;
+      if (recipient) {
+        const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipient);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('user-typing', { isTyping: false });
+        }
+      } else {
+        socket.broadcast.emit('user-typing', { isTyping: false });
       }
     });
 

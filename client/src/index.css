@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #1a1d21;
-  --color-dark-card: #202327;
+  --color-dark-bg: #0a0c10;
+  --color-dark-card: rgba(20, 24, 31, 0.6);
   --color-accent-red: #ff4d4d;
-  --color-bubble-received: #2a2e35;
+  --color-accent-indigo: #6366f1;
   
-  --shadow-neo-out: 8px 8px 16px #131518, -8px -8px 16px #21252a;
-  --shadow-neo-in: inset 6px 6px 12px #131518, inset -6px -6px 12px #21252a;
-  --shadow-red-glow: 0 0 20px rgba(255, 77, 77, 0.4);
+  --shadow-neo-out: 8px 8px 16px #050608, -8px -8px 16px #0f1218;
+  --shadow-neo-in: inset 6px 6px 12px #050608, inset -6px -6px 12px #0f1218;
+  --shadow-red-glow: 0 0 30px rgba(255, 77, 77, 0.3);
 }
 
 :root {
@@ -20,27 +20,53 @@
 body {
   margin: 0;
   background-color: var(--color-dark-bg);
-  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Animations */
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Glowing Background Orbs */
+.orb {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.15;
+  pointer-events: none;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.5s ease-out forwards;
+.orb-red {
+  background: radial-gradient(circle, var(--color-accent-red) 0%, transparent 70%);
+  top: -200px;
+  right: -100px;
+  animation: float 20s infinite alternate;
+}
+
+.orb-indigo {
+  background: radial-gradient(circle, var(--color-accent-indigo) 0%, transparent 70%);
+  bottom: -200px;
+  left: -100px;
+  animation: float 25s infinite alternate-reverse;
+}
+
+@keyframes float {
+  from { transform: translate(0, 0); }
+  to { transform: translate(100px, 100px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 4s infinite ease-in-out;
 }

@@ -1,27 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import io from 'socket.io-client';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Menu, Send, Mic, Globe } from 'lucide-react';
+import { Menu, Send, Mic, Globe, ChevronUp } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
 const socket = io('http://localhost:9000', { autoConnect: false });
 
 const Chat = ({ user, setAuth }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Set initial chat based on Home page selection
+  const initialSelected = location.state?.initialMode === 'personal' ? 'placeholder' : null;
+
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [allUsers, setAllUsers] = useState([]);
   const [onlineList, setOnlineList] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null); // null = Global
+  const [isSidebarOpen, setIsSidebarOpen] = useState(location.state?.initialMode === 'personal');
+  
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  
   const messagesEndRef = useRef(null);
-  const navigate = useNavigate();
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     socket.connect();
     socket.emit('join-chat', user);
-    
     axios.get('http://localhost:9000/api/chat/users').then(res => setAllUsers(res.data));
 
     socket.on('message-received', (msg) => {
@@ -30,13 +42,24 @@ const Chat = ({ user, setAuth }) => {
       if (isGlobalMsg || isPrivateMsg) {
         setMessages(prev => [...prev, msg]);
       } else {
+        const sender = msg.recipientName === null ? 'global' : msg.senderName;
+        setUnreadCounts(prev => ({ ...prev, [sender]: (prev[sender] || 0) + 1 }));
         toast(`New message from ${msg.senderName}`, { icon: '💬' });
       }
     });
 
-    socket.on('load-messages', (history) => setMessages(history));
+    socket.on('load-messages', (data) => {
+      if (skip === 0) setMessages(data.messages);
+      else setMessages(prev => [...data.messages, ...prev]);
+      setHasMore(data.isMore);
+    });
+
+    socket.on('user-typing', (data) => {
+      if (data.isTyping) setTypingUser(data.username);
+      else setTypingUser(null);
+    });
+
     socket.on('online-users-list', (list) => setOnlineList(list));
-    
     socket.on('user-status-change', (data) => {
       if (data.username !== user) {
         toast(`${data.username} is ${data.status}`, { icon: data.status === 'online' ? '🟢' : '⚫' });
@@ -44,19 +67,47 @@ const Chat = ({ user, setAuth }) => {
     });
 
     return () => { socket.disconnect(); socket.off(); };
-  }, [user, selectedChat]);
+  }, [user, selectedChat, skip]);
 
   useEffect(() => {
-    socket.emit('fetch-history', { sender: user, recipient: selectedChat });
+    setSkip(0);
+    setHasMore(true);
+    socket.emit('fetch-history', { sender: user, recipient: selectedChat, skip: 0 });
+    const chatKey = selectedChat === null ? 'global' : selectedChat;
+    setUnreadCounts(prev => ({ ...prev, [chatKey]: 0 }));
   }, [selectedChat, user]);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { 
+    if (skip === 0) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
+  }, [messages, skip]);
+
+  const handleInputChange = (e) => {
+    setInputText(e.target.value);
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit('typing-start', { sender: user, recipient: selectedChat });
+    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      socket.emit('typing-stop', { recipient: selectedChat });
+    }, 2000);
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
+    setIsTyping(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    socket.emit('typing-stop', { recipient: selectedChat });
     socket.emit('send-message', { senderName: user, recipientName: selectedChat, text: inputText });
     setInputText('');
+  };
+
+  const loadMoreMessages = () => {
+    const newSkip = skip + 20;
+    setSkip(newSkip);
+    socket.emit('fetch-history', { sender: user, recipient: selectedChat, skip: newSkip });
   };
 
   const handleLogout = () => { localStorage.clear(); setAuth(null); navigate('/login'); };
@@ -72,6 +123,7 @@ const Chat = ({ user, setAuth }) => {
         onLogout={handleLogout}
         selectedChat={selectedChat}
         setSelectedChat={setSelectedChat}
+        unreadCounts={unreadCounts}
       />
 
       <div className="flex-1 flex flex-col min-w-0 bg-dark-bg">
@@ -81,7 +133,7 @@ const Chat = ({ user, setAuth }) => {
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden w-10 h-10 rounded-full shadow-neo-out flex items-center justify-center mr-2">
               <Menu size={20} />
             </button>
-            <div className="w-12 h-12 rounded-full shadow-neo-out p-0.5">
+            <div className="w-12 h-12 rounded-full shadow-neo-out p-0.5 relative">
               {selectedChat ? (
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedChat}`} className="rounded-full" alt="avatar" />
               ) : (
@@ -92,11 +144,13 @@ const Chat = ({ user, setAuth }) => {
             </div>
             <div>
               <h2 className="text-lg font-black text-white">{selectedChat ? selectedChat : 'Global Chat'}</h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                {selectedChat ? (
-                  <>{onlineList.includes(selectedChat) ? 'Active Now' : 'Offline'}</>
+              <p className="text-[10px] font-bold text-accent-red uppercase tracking-widest flex items-center gap-1.5 h-4">
+                {typingUser ? (
+                  <span className="animate-pulse">{typingUser} is typing...</span>
                 ) : (
-                  <>{onlineList.length} Active Members</>
+                  <span className="text-slate-500">
+                    {selectedChat ? (onlineList.includes(selectedChat) ? 'Active Now' : 'Offline') : `${onlineList.length} Active`}
+                  </span>
                 )}
               </p>
             </div>
@@ -105,22 +159,56 @@ const Chat = ({ user, setAuth }) => {
 
         {/* Messages */}
         <main className="flex-1 overflow-y-auto p-6 space-y-8">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex flex-col ${m.senderName === user ? 'items-end' : 'items-start'} animate-slide-up`}>
-              <div className={`
-                max-w-[85%] md:max-w-[70%] px-5 py-4 rounded-4xl text-sm font-semibold leading-relaxed shadow-neo-out
-                ${m.senderName === user 
-                  ? 'bg-accent-red text-white rounded-tr-none shadow-red-glow' 
-                  : 'bg-bubble-received text-slate-300 rounded-tl-none border border-white/5'}
-              `}>
-                {m.text}
-                <span className={`block text-[9px] mt-2 opacity-60 ${m.senderName === user ? 'text-right' : 'text-left'}`}>
-                  {m.time}
-                </span>
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+          {!selectedChat && messages.length === 0 && (
+             <div className="h-full flex flex-col items-center justify-center text-center opacity-40 grayscale">
+                <Globe size={64} className="mb-4" />
+                <p className="font-black uppercase tracking-[0.3em] text-xs">No public chatter yet...</p>
+             </div>
+          )}
+
+          {selectedChat === 'placeholder' ? (
+             <div className="h-full flex flex-col items-center justify-center text-center">
+                <div className="w-24 h-24 rounded-4xl shadow-neo-out flex items-center justify-center text-accent-red mb-6 animate-bounce">
+                  <User size={48} />
+                </div>
+                <h3 className="text-xl font-black text-white mb-2">Private Mode Active</h3>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest px-12">Select a user from the sidebar to start a secure conversation.</p>
+             </div>
+          ) : (
+            <>
+              {hasMore && (
+                <div className="flex justify-center">
+                  <button 
+                    onClick={loadMoreMessages}
+                    className="flex items-center gap-2 px-6 py-2 rounded-full shadow-neo-out text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all"
+                  >
+                    <ChevronUp size={14} />
+                    Load Older Messages
+                  </button>
+                </div>
+              )}
+              
+              {messages.map((m, i) => (
+                <div key={i} className={`flex flex-col ${m.senderName === user ? 'items-end' : 'items-start'} animate-slide-up`}>
+                  <div className={`
+                    max-w-[85%] md:max-w-[70%] px-5 py-4 rounded-4xl text-sm font-semibold leading-relaxed shadow-neo-out
+                    ${m.senderName === user 
+                      ? 'bg-accent-red text-white rounded-tr-none shadow-red-glow' 
+                      : 'bg-bubble-received text-slate-300 rounded-tl-none border border-white/5'}
+                  `}>
+                    {m.text}
+                    <span className={`block text-[9px] mt-2 opacity-60 ${m.senderName === user ? 'text-right' : 'text-left'}`}>
+                      {m.time}
+                    </span>
+                  </div>
+                  {m.senderName !== user && (
+                    <span className="text-[9px] font-black text-slate-600 mt-2 ml-2 uppercase tracking-widest">{m.senderName}</span>
+                  )}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </>
+          )}
         </main>
 
         {/* Input */}
@@ -129,12 +217,17 @@ const Chat = ({ user, setAuth }) => {
             <div className="flex-1 shadow-neo-in rounded-4xl px-6 py-4 flex items-center gap-4 bg-dark-bg/50">
               <input 
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder={selectedChat ? `Message ${selectedChat}...` : "Broadcast to everyone..."}
-                className="bg-transparent border-none outline-none text-sm font-semibold text-white w-full"
+                onChange={handleInputChange}
+                disabled={selectedChat === 'placeholder'}
+                placeholder={selectedChat === 'placeholder' ? "Select a contact first..." : (selectedChat ? `Message ${selectedChat}...` : "Broadcast to everyone...")}
+                className="bg-transparent border-none outline-none text-sm font-semibold text-white w-full placeholder:text-slate-700 disabled:opacity-30"
               />
             </div>
-            <button type="submit" className="w-14 h-14 bg-accent-red text-white rounded-full flex items-center justify-center shadow-red-glow">
+            <button 
+              type="submit" 
+              disabled={selectedChat === 'placeholder'}
+              className="w-14 h-14 bg-accent-red text-white rounded-full flex items-center justify-center shadow-red-glow hover:scale-105 active:shadow-neo-in transition-all disabled:opacity-20"
+            >
               <Send size={22} />
             </button>
           </form>
