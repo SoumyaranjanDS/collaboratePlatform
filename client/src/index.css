@@ -1,47 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-bg: #1a1d21;
+  --color-dark-card: #202327;
+  --color-accent-red: #ff4d4d;
+  --color-bubble-received: #2a2e35;
+  
+  --shadow-neo-out: 8px 8px 16px #131518, -8px -8px 16px #21252a;
+  --shadow-neo-in: inset 6px 6px 12px #131518, inset -6px -6px 12px #21252a;
+  --shadow-red-glow: 0 0 20px rgba(255, 77, 77, 0.4);
+}
+
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: dark;
-  background-color: #0f172a;
-  color: #f8fafc;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-dark-bg);
+  color: #e2e8f0;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background-color: var(--color-dark-bg);
+  -webkit-font-smoothing: antialiased;
 }
 
-#root {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
 }
 
-h1 {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(to right, #38bdf8, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.05em;
+/* Animations */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-p.subtitle {
-  color: #94a3b8;
-  margin-bottom: 3rem;
-  font-size: 1.1rem;
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
 }
