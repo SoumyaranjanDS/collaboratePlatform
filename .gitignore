@@ -1,0 +1,50 @@
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build directories
+client/dist/
+
+# Environment variables
+.env
+client/.env
+server/.env
+
+# IDE and System files
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv ocean file
+.env.test
+.env.production
+
+# next.js build output
+.next/
+out/
+
+# Production build
+build/
