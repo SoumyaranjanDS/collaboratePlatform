@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Mail, Lock, Loader2, ChevronRight } from 'lucide-react';
 
@@ -14,8 +14,7 @@ const Login = ({ setAuth }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Updated API path
-      const res = await axios.post('http://localhost:9000/api/auth/login', { email, password });
+      const res = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('username', res.data.username);
       setAuth(res.data.username);

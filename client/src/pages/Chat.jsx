@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import io from 'socket.io-client';
-import axios from 'axios';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Menu, Send, Mic, Globe, ChevronUp } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 
-const socket = io('http://localhost:9000', { autoConnect: false });
+const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:9000';
+const socket = io(SOCKET_URL, { autoConnect: false });
 
 const Chat = ({ user, setAuth }) => {
   const location = useLocation();
@@ -34,7 +35,7 @@ const Chat = ({ user, setAuth }) => {
   useEffect(() => {
     socket.connect();
     socket.emit('join-chat', user);
-    axios.get('http://localhost:9000/api/chat/users').then(res => setAllUsers(res.data));
+    api.get('/chat/users').then(res => setAllUsers(res.data));
 
     socket.on('message-received', (msg) => {
       const isGlobalMsg = msg.recipientName === null && selectedChat === null;

@@ -18,7 +18,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 app.use(express.json());
 
 // API Routes
@@ -27,7 +27,7 @@ app.use('/api/chat', chatRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "http://localhost:5173" }
+  cors: { origin: process.env.CLIENT_URL || '*' }
 });
 
 // Initialize Socket.io

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
 
@@ -13,8 +13,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Updated API path
-      await axios.post('http://localhost:9000/api/auth/signup', formData);
+      await api.post('/auth/signup', formData);
       toast.success('Account created! Please log in.');
       navigate('/login');
     } catch (err) {

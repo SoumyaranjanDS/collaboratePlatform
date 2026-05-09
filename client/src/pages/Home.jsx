@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { Globe, MessageSquare, LogIn, LogOut } from 'lucide-react';
 
 const Home = () => {
@@ -10,7 +10,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:9000/api/chat/users').then((res) => setUsers(res.data));
+    api.get('/chat/users').then((res) => setUsers(res.data));
   }, []);
 
   const handleNavigation = (mode) => {
