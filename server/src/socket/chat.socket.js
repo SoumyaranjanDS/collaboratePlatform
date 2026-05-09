@@ -42,21 +42,23 @@ export const chatSocket = (io) => {
 
     socket.on('send-message', async (data) => {
       const { senderName, recipientName, text } = data;
-      const newMessage = await Message.create({
-        senderName,
-        recipientName,
-        text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const messageData = { senderName, recipientName, text, time };
+
+      // 1. Emit Instantly (Zero Delay)
       if (recipientName) {
         const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipientName);
         if (recipientSocketId) {
-          io.to(recipientSocketId).emit('message-received', newMessage);
+          io.to(recipientSocketId).emit('message-received', messageData);
         }
-        socket.emit('message-received', newMessage);
+        socket.emit('message-received', messageData);
       } else {
-        io.emit('message-received', newMessage);
+        io.emit('message-received', messageData);
       }
+
+      // 2. Save to Database asynchronously in the background
+      Message.create(messageData).catch(err => console.error('Error saving message:', err));
     });
 
     // NEW: Typing Indicators
