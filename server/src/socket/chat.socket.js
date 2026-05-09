@@ -41,10 +41,11 @@ export const chatSocket = (io) => {
     });
 
     socket.on('send-message', async (data) => {
-      const { senderName, recipientName, text } = data;
+      const { senderName, recipientName, text, isPhantom } = data;
       const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      const messageData = { senderName, recipientName, text, time };
+      const tempId = Date.now().toString(); // Temporary ID for immediate client rendering
+      const messageData = { _id: tempId, senderName, recipientName, text, time, isPhantom };
 
       // 1. Emit Instantly (Zero Delay)
       if (recipientName) {
@@ -57,8 +58,23 @@ export const chatSocket = (io) => {
         io.emit('message-received', messageData);
       }
 
-      // 2. Save to Database asynchronously in the background
-      Message.create(messageData).catch(err => console.error('Error saving message:', err));
+      // 2. Save to Database asynchronously and update the real _id
+      Message.create({ senderName, recipientName, text, time, isPhantom })
+        .then(savedMsg => {
+          // Send the real MongoDB _id back to the clients so they can delete it if it's a phantom msg
+          io.emit('message-id-update', { tempId, realId: savedMsg._id });
+        })
+        .catch(err => console.error('Error saving message:', err));
+    });
+
+    // Handle Phantom Message Deletion
+    socket.on('delete-message', async (messageId) => {
+      try {
+        await Message.findByIdAndDelete(messageId);
+        io.emit('message-deleted', messageId);
+      } catch (err) {
+        console.error("Error deleting phantom message", err);
+      }
     });
 
     // NEW: Typing Indicators
