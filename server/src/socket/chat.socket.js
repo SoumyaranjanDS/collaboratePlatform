@@ -77,6 +77,31 @@ export const chatSocket = (io) => {
       }
     });
 
+    // === WHITEBOARD EVENTS ===
+    socket.on('draw-line', (data) => {
+      const { recipientName } = data;
+      if (recipientName) {
+        const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipientName);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('draw-line', data);
+        }
+      } else {
+        socket.broadcast.emit('draw-line', data);
+      }
+    });
+
+    socket.on('clear-board', (data) => {
+      const { recipientName } = data;
+      if (recipientName) {
+        const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipientName);
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('clear-board');
+        }
+      } else {
+        socket.broadcast.emit('clear-board');
+      }
+    });
+
     // NEW: Typing Indicators
     socket.on('typing-start', (data) => {
       const { sender, recipient } = data;

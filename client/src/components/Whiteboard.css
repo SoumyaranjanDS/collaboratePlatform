@@ -1,0 +1,290 @@
+/* ===================================================
+   CHATIFY ULTRA — CUSTOM CANVAS SKIN
+   Deep CSS overrides for @excalidraw/excalidraw
+   Neumorphic / Glassmorphism dark theme
+   =================================================== */
+
+/* ---- Container ---- */
+.chatify-canvas {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  touch-action: none;
+  overflow: hidden;
+  background-color: #050508;
+  /* Subtly glowing dot grid */
+  background-image:
+    radial-gradient(circle, rgba(99, 102, 241, 0.10) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+}
+
+/* ---- Global Excalidraw Overrides ---- */
+.chatify-canvas .excalidraw {
+  --color-primary: #6366f1 !important;
+  --color-primary-darker: #4f46e5 !important;
+  --color-primary-darkest: #4338ca !important;
+  --color-primary-light: rgba(99, 102, 241, 0.15) !important;
+  --color-primary-contrast-color: #fff !important;
+
+  --color-surface-lowest: #050508 !important;
+  --color-surface-low: #0a0c10 !important;
+  --color-surface-mid: #10131a !important;
+  --color-surface-high: #181c25 !important;
+  --color-surface-highest: #1e222e !important;
+
+  --color-on-surface: #cbd5e1 !important;
+  --color-text-primary: #e2e8f0 !important;
+
+  --island-bg-color: rgba(8, 10, 15, 0.82) !important;
+  --default-bg-color: transparent !important;
+
+  --color-border-outline: rgba(255, 255, 255, 0.06) !important;
+  --color-border-outline-variant: rgba(255, 255, 255, 0.04) !important;
+
+  --border-radius-md: 16px !important;
+  --border-radius-lg: 20px !important;
+
+  font-family: inherit !important;
+  background: transparent !important;
+}
+
+/* ---- Force Transparent Canvas ---- */
+.chatify-canvas .excalidraw,
+.chatify-canvas .excalidraw .excalidraw__canvas,
+.chatify-canvas .excalidraw canvas {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ---- Floating Islands (Toolbar Containers) ---- */
+.chatify-canvas .excalidraw .Island {
+  background: rgba(8, 10, 15, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 20px !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+  padding: 6px !important;
+}
+
+/* ---- Tool Buttons ---- */
+.chatify-canvas .excalidraw .ToolIcon_type_button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.chatify-canvas .excalidraw .ToolIcon_type_button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.chatify-canvas .excalidraw .ToolIcon_type_button--selected {
+  background: rgba(99, 102, 241, 0.18) !important;
+  box-shadow:
+    0 0 0 1.5px rgba(99, 102, 241, 0.5),
+    0 0 12px rgba(99, 102, 241, 0.12) !important;
+}
+
+.chatify-canvas .excalidraw .ToolIcon_type_button--selected svg {
+  color: #818cf8 !important;
+}
+
+.chatify-canvas .excalidraw .ToolIcon__icon {
+  color: #94a3b8 !important;
+}
+
+.chatify-canvas .excalidraw .ToolIcon_type_button:hover .ToolIcon__icon {
+  color: #e2e8f0 !important;
+}
+
+/* ---- Side Panel / Properties Panel ---- */
+.chatify-canvas .excalidraw .App-menu__left,
+.chatify-canvas .excalidraw .layer-ui__wrapper__top-right {
+  z-index: 3 !important;
+}
+
+/* ---- Popover / Dropdown Menus ---- */
+.chatify-canvas .excalidraw .popover,
+.chatify-canvas .excalidraw [class*="Popover"],
+.chatify-canvas .excalidraw [class*="dropdown-menu"] {
+  background: rgba(8, 10, 15, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ---- Color Picker ---- */
+.chatify-canvas .excalidraw .color-picker {
+  background: rgba(8, 10, 15, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+.chatify-canvas .excalidraw .color-picker__button {
+  border-radius: 10px !important;
+  border: 2px solid transparent !important;
+  transition: all 0.15s ease !important;
+}
+
+.chatify-canvas .excalidraw .color-picker__button:hover {
+  transform: scale(1.15);
+}
+
+.chatify-canvas .excalidraw .color-picker__button.active {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* ---- Input Fields ---- */
+.chatify-canvas .excalidraw input,
+.chatify-canvas .excalidraw select {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  color: #e2e8f0 !important;
+}
+
+.chatify-canvas .excalidraw input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* ---- Buttons (generic) ---- */
+.chatify-canvas .excalidraw button {
+  border-radius: 10px !important;
+}
+
+/* ---- Context Menu ---- */
+.chatify-canvas .excalidraw .context-menu {
+  background: rgba(8, 10, 15, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+  overflow: hidden !important;
+}
+
+.chatify-canvas .excalidraw .context-menu-option:hover {
+  background: rgba(99, 102, 241, 0.12) !important;
+}
+
+/* ---- Bottom Bar (Undo/Redo/Zoom) ---- */
+.chatify-canvas .excalidraw .undo-redo-buttons,
+.chatify-canvas .excalidraw .zoom-actions {
+  background: rgba(8, 10, 15, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+}
+
+/* ---- Dialog / Modal ---- */
+.chatify-canvas .excalidraw .Modal__background {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.chatify-canvas .excalidraw .Modal__content {
+  background: rgba(8, 10, 15, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* ---- Scrollbars ---- */
+.chatify-canvas .excalidraw ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.chatify-canvas .excalidraw ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatify-canvas .excalidraw ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+/* ---- Tooltips ---- */
+.chatify-canvas .excalidraw .Tooltip {
+  background: rgba(8, 10, 15, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  color: #cbd5e1 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ---- Welcome Screen / Hints (hide) ---- */
+.chatify-canvas .excalidraw .welcome-screen-center,
+.chatify-canvas .excalidraw .HintViewer {
+  display: none !important;
+}
+
+/* ---- Hide Excalidraw Footer Branding ---- */
+.chatify-canvas .excalidraw .encrypted-icon,
+.chatify-canvas .excalidraw a[href*="excalidraw"],
+.chatify-canvas .excalidraw a[href*="plus.excalidraw"],
+.chatify-canvas .excalidraw .footer-center {
+  display: none !important;
+}
+
+/* =============== MOBILE RESPONSIVE =============== */
+
+@media (max-width: 768px) {
+  .chatify-canvas {
+    background-size: 22px 22px;
+  }
+
+  .chatify-canvas .excalidraw .Island {
+    padding: 4px !important;
+    border-radius: 14px !important;
+    gap: 2px !important;
+  }
+
+  .chatify-canvas .excalidraw .ToolIcon_type_button {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    border-radius: 10px !important;
+  }
+
+  .chatify-canvas .excalidraw .ToolIcon__icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .chatify-canvas .excalidraw .App-menu {
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  .chatify-canvas .excalidraw footer {
+    transform: scale(0.85);
+    transform-origin: bottom center;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatify-canvas {
+    background-size: 18px 18px;
+  }
+
+  .chatify-canvas .excalidraw .Island {
+    padding: 3px !important;
+    border-radius: 12px !important;
+  }
+
+  .chatify-canvas .excalidraw .ToolIcon_type_button {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+  }
+}

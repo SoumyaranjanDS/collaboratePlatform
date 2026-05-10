@@ -3,8 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import io from 'socket.io-client';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Menu, Send, Globe, ChevronUp, Ghost } from 'lucide-react';
+import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import Whiteboard from '../components/Whiteboard';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -117,6 +118,8 @@ const Chat = ({ user, setAuth }) => {
   const [onlineList, setOnlineList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(location.state?.initialMode === 'personal');
+  const [isWhiteboardActive, setIsWhiteboardActive] = useState(false);
+  const [canvasStates, setCanvasStates] = useState({}); // Stores board data per chat
   
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
@@ -225,20 +228,43 @@ const Chat = ({ user, setAuth }) => {
 
   return (
     <div className="h-screen flex bg-dark-bg overflow-hidden text-slate-200 font-sans">
-      <Sidebar 
-        user={user} 
-        allUsers={allUsers} 
-        onlineList={onlineList} 
-        isOpen={isSidebarOpen} 
-        setIsOpen={setIsSidebarOpen} 
-        onLogout={handleLogout}
-        selectedChat={selectedChat}
-        setSelectedChat={setSelectedChat}
-        unreadCounts={unreadCounts}
-      />
+      {/* Sidebar: hidden when canvas is active */}
+      {!isWhiteboardActive && (
+        <Sidebar 
+          user={user} 
+          allUsers={allUsers} 
+          onlineList={onlineList} 
+          isOpen={isSidebarOpen} 
+          setIsOpen={setIsSidebarOpen} 
+          onLogout={handleLogout}
+          selectedChat={selectedChat}
+          setSelectedChat={setSelectedChat}
+          unreadCounts={unreadCounts}
+        />
+      )}
 
       <div className="flex-1 flex flex-col min-w-0 bg-dark-bg">
-        {/* Header */}
+        {/* Header: compact floating bar when canvas is active */}
+        {isWhiteboardActive ? (
+          <div className="absolute top-1/2 left-2 md:left-4 -translate-y-1/2 z-20 flex flex-col items-center gap-3 md:gap-4 glass px-1.5 md:px-3 py-3 md:py-5 rounded-xl md:rounded-2xl shadow-lg border border-white/5">
+            <div className="w-7 h-7 md:w-10 md:h-10 rounded-full overflow-hidden shadow-neo-out p-0.5">
+              {selectedChat ? (
+                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedChat}`} className="rounded-full w-full h-full" alt="avatar" />
+              ) : (
+                <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center text-accent-red"><Globe size={14} /></div>
+              )}
+            </div>
+            <span className="text-[8px] md:text-[10px] font-black text-white writing-vertical [writing-mode:vertical-lr] tracking-widest uppercase rotate-180">{selectedChat || 'Global'}</span>
+            <div className="w-5 md:w-8 h-px bg-white/10" />
+            <button 
+              onClick={() => setIsWhiteboardActive(false)}
+              className="p-1.5 md:p-2.5 rounded-lg md:rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              title="Back to Chat"
+            >
+              <MessageSquare className="w-3.5 h-3.5 md:w-5 md:h-5" />
+            </button>
+          </div>
+        ) : (
         <header className="h-24 px-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden w-10 h-10 rounded-full shadow-neo-out flex items-center justify-center mr-2">
@@ -256,7 +282,7 @@ const Chat = ({ user, setAuth }) => {
             <div>
               <h2 className="text-lg font-black text-white">{selectedChat ? selectedChat : 'Global Chat'}</h2>
               <p className="text-[10px] font-bold text-accent-red uppercase tracking-widest flex items-center gap-1.5 h-4">
-                {typingUser ? (
+                {typingUser && !isWhiteboardActive ? (
                   <span className="animate-pulse">{typingUser} is typing...</span>
                 ) : (
                   <span className="text-slate-500">
@@ -266,10 +292,31 @@ const Chat = ({ user, setAuth }) => {
               </p>
             </div>
           </div>
-        </header>
 
-        {/* Messages */}
-        <main className="flex-1 overflow-y-auto p-6">
+          {/* Whiteboard Toggle Button */}
+          <button 
+            onClick={() => setIsWhiteboardActive(!isWhiteboardActive)}
+            className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-black uppercase tracking-widest transition-all ${isWhiteboardActive ? 'bg-accent-indigo text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 shadow-neo-out'}`}
+          >
+            {isWhiteboardActive ? <MessageSquare size={16} /> : <PenTool size={16} />}
+            <span className="hidden md:inline">{isWhiteboardActive ? 'Chat' : 'Canvas'}</span>
+          </button>
+        </header>
+        )}
+
+        {isWhiteboardActive ? (
+          <div className="flex-1 p-0 h-[100dvh] relative">
+            <Whiteboard 
+              socket={socket} 
+              selectedChat={selectedChat} 
+              initialData={canvasStates[selectedChat || 'global']}
+              onSave={(dataUrl) => setCanvasStates(prev => ({ ...prev, [selectedChat || 'global']: dataUrl }))}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Messages */}
+            <main className="flex-1 overflow-y-auto p-6">
           {!selectedChat && messages.length === 0 && (
              <div className="h-full flex flex-col items-center justify-center text-center opacity-40 grayscale">
                 <Globe size={64} className="mb-4" />
@@ -339,9 +386,11 @@ const Chat = ({ user, setAuth }) => {
               className={`w-14 h-14 text-white rounded-full flex items-center justify-center transition-all disabled:opacity-20 ${isPhantomMode ? 'bg-accent-indigo shadow-[0_0_20px_rgba(99,102,241,0.5)]' : 'bg-accent-red shadow-red-glow hover:scale-105 active:shadow-neo-in'}`}
             >
               <Send size={22} />
-            </button>
-          </form>
-        </footer>
+              </button>
+            </form>
+          </footer>
+        </>
+        )}
       </div>
     </div>
   );
