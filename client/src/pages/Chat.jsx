@@ -246,8 +246,8 @@ const Chat = ({ user, setAuth }) => {
       <div className="flex-1 flex flex-col min-w-0 bg-dark-bg">
         {/* Header: compact floating bar when canvas is active */}
         {isWhiteboardActive ? (
-          <div className="absolute top-1/2 left-2 md:left-4 -translate-y-1/2 z-20 flex flex-col items-center gap-3 md:gap-4 glass px-1.5 md:px-3 py-3 md:py-5 rounded-xl md:rounded-2xl shadow-lg border border-white/5">
-            <div className="w-7 h-7 md:w-10 md:h-10 rounded-full overflow-hidden shadow-neo-out p-0.5">
+          <div className="absolute bottom-36 md:bottom-4 left-2 md:left-4 z-20 flex flex-col items-center gap-2 md:gap-3 glass px-1.5 md:px-3 py-2 md:py-4 rounded-xl md:rounded-2xl shadow-lg border border-white/5">
+            <div className="w-6 h-6 md:w-9 md:h-9 rounded-full overflow-hidden shadow-neo-out p-0.5">
               {selectedChat ? (
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedChat}`} className="rounded-full w-full h-full" alt="avatar" />
               ) : (
@@ -265,12 +265,12 @@ const Chat = ({ user, setAuth }) => {
             </button>
           </div>
         ) : (
-        <header className="h-24 px-6 flex items-center justify-between border-b border-white/5">
+        <header className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden w-10 h-10 rounded-full shadow-neo-out flex items-center justify-center mr-2">
               <Menu size={20} />
             </button>
-            <div className="w-12 h-12 rounded-full shadow-neo-out p-0.5 relative">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full shadow-neo-out p-0.5 relative">
               {selectedChat ? (
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedChat}`} className="rounded-full" alt="avatar" />
               ) : (

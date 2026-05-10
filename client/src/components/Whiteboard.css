@@ -242,32 +242,30 @@
     background-size: 22px 22px;
   }
 
+  /* Slightly compact the Islands but don't force sizes on tool buttons —
+     Excalidraw needs its own sizing logic for the editing panels to work */
   .chatify-canvas .excalidraw .Island {
     padding: 4px !important;
     border-radius: 14px !important;
-    gap: 2px !important;
   }
 
-  .chatify-canvas .excalidraw .ToolIcon_type_button {
-    width: 30px !important;
-    height: 30px !important;
-    min-width: 30px !important;
-    min-height: 30px !important;
-    border-radius: 10px !important;
+  /* Ensure the properties/editing panel (left menu) is fully visible */
+  .chatify-canvas .excalidraw .App-menu__left {
+    max-width: calc(100vw - 12px) !important;
+    overflow-y: auto !important;
+    max-height: 70vh !important;
   }
 
-  .chatify-canvas .excalidraw .ToolIcon__icon {
-    width: 16px !important;
-    height: 16px !important;
+  /* Make sure the shape editing panel stays on top */
+  .chatify-canvas .excalidraw .layer-ui__wrapper {
+    z-index: 2 !important;
   }
 
-  .chatify-canvas .excalidraw .App-menu {
-    max-width: calc(100vw - 16px) !important;
-  }
-
+  /* Push Excalidraw's bottom bar (undo/redo/zoom) higher to clear mobile browser nav */
+  .chatify-canvas .excalidraw .layer-ui__wrapper__footer-left,
+  .chatify-canvas .excalidraw .layer-ui__wrapper__footer-right,
   .chatify-canvas .excalidraw footer {
-    transform: scale(0.85);
-    transform-origin: bottom center;
+    margin-bottom: 60px !important;
   }
 }
 
@@ -279,12 +277,5 @@
   .chatify-canvas .excalidraw .Island {
     padding: 3px !important;
     border-radius: 12px !important;
-  }
-
-  .chatify-canvas .excalidraw .ToolIcon_type_button {
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    min-height: 26px !important;
   }
 }
