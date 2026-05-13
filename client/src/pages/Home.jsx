@@ -312,9 +312,9 @@ const Home = () => {
             <div>
               <h5 className="text-white text-[10px] font-bold tracking-widest uppercase mb-8">Connect</h5>
               <div className="flex flex-col gap-4 text-[10px] font-medium uppercase tracking-widest opacity-30">
-                <a href="#" className="flex items-center gap-2 hover:text-white transition-colors"><LinkedInIcon size={12} /> LinkedIn</a>
-                <a href="#" className="flex items-center gap-2 hover:text-white transition-colors"><GitHubIcon size={12} /> GitHub</a>
-                <a href="#" className="flex items-center gap-2 hover:text-white transition-colors"><InstagramIcon size={12} /> Instagram</a>
+                <a href="https://www.linkedin.com/in/soumyaranjanlink/" className="flex items-center gap-2 hover:text-white transition-colors"><LinkedInIcon size={12} /> LinkedIn</a>
+                <a href="https://www.github.com/SoumyaranjanDS" className="flex items-center gap-2 hover:text-white transition-colors"><GitHubIcon size={12} /> GitHub</a>
+                <a href="https://www.instagram.com/_.soumya_28?igsh=MW51OTV2bnc3aHdxaQ==" className="flex items-center gap-2 hover:text-white transition-colors"><InstagramIcon size={12} /> Instagram</a>
               </div>
             </div>
 
@@ -335,9 +335,9 @@ const Home = () => {
                 href="https://soumya.site" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-white hover:underline underline-offset-4 transition-all"
+                className="text-white italic hover:underline underline-offset-4 transition-all"
               >
-                soumys
+                soumya
               </a>
             </p>
           </div>
