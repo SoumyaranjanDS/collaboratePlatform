@@ -41,11 +41,11 @@ export const chatSocket = (io) => {
     });
 
     socket.on('send-message', async (data) => {
-      const { senderName, recipientName, text, isPhantom } = data;
+      const { senderName, recipientName, text, isPhantom, fileUrl, fileType, fileName, replyTo } = data;
       const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      const tempId = Date.now().toString(); // Temporary ID for immediate client rendering
-      const messageData = { _id: tempId, senderName, recipientName, text, time, isPhantom };
+      const tempId = Date.now().toString();
+      const messageData = { _id: tempId, senderName, recipientName, text, time, isPhantom, fileUrl, fileType, fileName, replyTo, reactions: [] };
 
       // 1. Emit Instantly (Zero Delay)
       if (recipientName) {
@@ -58,10 +58,9 @@ export const chatSocket = (io) => {
         io.emit('message-received', messageData);
       }
 
-      // 2. Save to Database asynchronously and update the real _id
-      Message.create({ senderName, recipientName, text, time, isPhantom })
+      // 2. Save to Database asynchronously
+      Message.create({ senderName, recipientName, text: text || '', time, isPhantom, fileUrl, fileType, fileName, replyTo: replyTo || {} })
         .then(savedMsg => {
-          // Send the real MongoDB _id back to the clients so they can delete it if it's a phantom msg
           io.emit('message-id-update', { tempId, realId: savedMsg._id });
         })
         .catch(err => console.error('Error saving message:', err));
@@ -74,6 +73,49 @@ export const chatSocket = (io) => {
         io.emit('message-deleted', messageId);
       } catch (err) {
         console.error("Error deleting phantom message", err);
+      }
+    });
+
+    // === REACTIONS ===
+    socket.on('react-to-message', async ({ messageId, emoji, username }) => {
+      try {
+        const msg = await Message.findById(messageId);
+        if (!msg) return;
+
+        const existing = msg.reactions.find(r => r.emoji === emoji);
+        if (existing) {
+          if (existing.users.includes(username)) {
+            existing.users = existing.users.filter(u => u !== username);
+            if (existing.users.length === 0) {
+              msg.reactions = msg.reactions.filter(r => r.emoji !== emoji);
+            }
+          } else {
+            existing.users.push(username);
+          }
+        } else {
+          msg.reactions.push({ emoji, users: [username] });
+        }
+
+        await msg.save();
+        io.emit('message-reaction-update', { messageId, reactions: msg.reactions });
+      } catch (err) {
+        console.error('Reaction error:', err);
+      }
+    });
+
+    // === READ RECEIPTS ===
+    socket.on('mark-read', async ({ reader, sender }) => {
+      try {
+        await Message.updateMany(
+          { senderName: sender, recipientName: reader, isRead: false },
+          { $set: { isRead: true } }
+        );
+        const senderSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === sender);
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('messages-read', { reader, sender });
+        }
+      } catch (err) {
+        console.error('Read receipt error:', err);
       }
     });
 

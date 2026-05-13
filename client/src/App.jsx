@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
+import Docs from './pages/Docs';
 
 function App() {
   const [auth, setAuth] = useState(localStorage.getItem('username'));
@@ -30,6 +31,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login setAuth={setAuth} />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/docs" element={<Docs />} />
         <Route path="/chat" element={auth ? <Chat user={auth} setAuth={setAuth} /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
