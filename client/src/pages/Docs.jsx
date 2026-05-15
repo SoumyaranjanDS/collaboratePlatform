@@ -8,7 +8,13 @@ const Docs = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#a1a1aa] font-sans selection:bg-blue-500/30 relative overflow-x-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen bg-[#050505] text-[#a1a1aa] font-sans selection:bg-blue-500/30 relative overflow-x-hidden"
+    >
       
       {/* BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -18,18 +24,15 @@ const Docs = () => {
       </div>
 
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-white/5 bg-[#050505]/40">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => navigate('/')}
-          >
-            <img src="/logo.png" alt="logo" className="w-8 h-8 object-contain rounded-full" />
-            <span className="text-white text-[11px] font-bold tracking-[0.3em] uppercase">Chatify Docs</span>
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl">
+        <div className="backdrop-blur-xl border border-white/10 bg-[#050505]/60 rounded-full px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+            <img src="/logo.png" alt="logo" className="w-7 h-7 object-contain rounded-full border border-white/10 group-hover:scale-110 transition-transform" />
+            <span className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">Chatify Docs</span>
           </div>
           <button 
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase hover:text-white transition-colors"
+            className="flex items-center gap-2 text-[9px] font-bold tracking-widest uppercase text-white/40 hover:text-white transition-all hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={14} />
             Back to Home
@@ -104,12 +107,25 @@ const Docs = () => {
         </motion.div>
       </main>
 
-      <footer className="relative z-10 py-12 border-t border-white/5 text-center">
-        <p className="text-[10px] font-bold tracking-widest uppercase opacity-20">
-          &copy; {new Date().getFullYear()} Chatify Laboratory. Protocol Documentation V1.0
-        </p>
+      <footer className="relative z-10 py-16 border-t border-white/5 text-center">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-[10px] font-bold tracking-[0.3em] uppercase">
+            <p className="opacity-20">&copy; {new Date().getFullYear()} Chatify Laboratory. Protocol Docs V1.0</p>
+            <p>
+              <span className="opacity-20 lowercase italic font-normal tracking-normal mr-2">developed by</span>
+              <a 
+                href="https://soumya.site" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-blue-500 transition-colors"
+              >
+                soumya
+              </a>
+            </p>
+          </div>
+        </div>
       </footer>
-    </div>
+    </motion.div>
   );
 };
 
