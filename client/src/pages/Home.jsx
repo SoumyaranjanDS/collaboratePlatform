@@ -113,38 +113,79 @@ const Home = () => {
                 <button onClick={() => navigate('/login')} className="text-white text-[9px] font-bold tracking-widest uppercase bg-blue-600 px-5 py-2 rounded-full hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 active:scale-95">Launch</button>
               )}
             </div>
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-white hover:text-blue-500 transition-colors p-1">
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="md:hidden text-white/50 hover:text-white transition-colors p-2"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-        </div>
 
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="md:hidden border-b border-white/5 bg-[#050505]/95 backdrop-blur-xl overflow-hidden">
-              <div className="flex flex-col p-8 gap-8">
-                <button onClick={scrollToFeatures} className="text-[11px] font-bold tracking-[0.3em] uppercase text-left">Features</button>
-                <button onClick={() => navigate('/docs')} className="text-[11px] font-bold tracking-[0.3em] uppercase text-left">Docs</button>
-                <button onClick={() => navigate('/status')} className="text-[11px] font-bold tracking-[0.3em] uppercase text-left">Status</button>
-                <div className="pt-8 border-t border-white/5">
-                  {isLoggedIn ? (
-                    <div className="flex flex-col gap-6">
-                      <div className="flex items-center gap-3">
-                        <img src={avatarUrl} alt="profile" className="w-6 h-6 rounded-full border border-white/10" />
-                        <span className="text-white text-[11px] font-bold tracking-widest uppercase">{username}</span>
-                      </div>
-                      <button onClick={() => navigate('/chat')} className="w-full py-4 bg-white/5 border border-white/10 text-white text-[11px] font-bold tracking-[0.3em] uppercase rounded-sm">Go to Dashboard</button>
-                      <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="text-[11px] font-bold tracking-[0.3em] uppercase text-red-500 text-left">Exit Session</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => navigate('/login')} className="w-full py-4 bg-blue-600 text-white text-[11px] font-bold tracking-[0.3em] uppercase rounded-sm">Launch App</button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
       </nav>
+
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
+            animate={{ opacity: 1, backdropFilter: 'blur(24px)' }} 
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-40 md:hidden bg-[#050505]/90 flex flex-col justify-center items-start pl-8 sm:pl-12"
+          >
+            <div className="absolute top-0 right-0 w-full h-full pointer-events-none overflow-hidden">
+              <div className="absolute -top-1/4 -right-1/4 w-full h-[150%] bg-blue-500/10 blur-[120px] rounded-full" />
+              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="absolute left-6 sm:left-10 top-0 w-px h-full bg-gradient-to-b from-transparent via-white/5 to-transparent" />
+            </div>
+
+            <motion.div 
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={{
+                animate: { transition: { staggerChildren: 0.1 } }
+              }}
+              className="flex flex-col gap-6 relative z-10 w-full pr-8"
+            >
+              {[
+                { label: '01. Features', action: scrollToFeatures },
+                { label: '02. Documentation', action: () => navigate('/docs') },
+                { label: '03. System Status', action: () => navigate('/status') },
+                { label: isLoggedIn ? '04. Dashboard' : '04. Launch App', action: () => navigate(isLoggedIn ? '/chat' : '/login') }
+              ].map((item, i) => (
+                <motion.button
+                  key={item.label}
+                  variants={{
+                    initial: { opacity: 0, x: -30, skewX: -5 },
+                    animate: { opacity: 1, x: 0, skewX: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+                    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
+                  }}
+                  onClick={() => { item.action(); setIsMobileMenuOpen(false); }}
+                  className="text-white text-4xl sm:text-6xl font-bold tracking-tighter hover:text-blue-500 transition-colors text-left flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6 group w-full"
+                >
+                  <span className="text-blue-500/60 text-sm sm:text-base font-mono tracking-widest">{item.label.split('.')[0]}.</span>
+                  <span className="group-hover:translate-x-4 transition-transform duration-300 leading-none">{item.label.split('.')[1]}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+              className="absolute bottom-12 left-8 sm:left-12 flex gap-6 z-10"
+            >
+              <a href="https://github.com/SoumyaranjanDS" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors text-[10px] font-mono tracking-widest uppercase flex items-center gap-2">
+                <span className="w-3 h-px bg-white/40" /> GitHub
+              </a>
+              <a href="https://www.linkedin.com/in/soumyaranjanlink/" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors text-[10px] font-mono tracking-widest uppercase flex items-center gap-2">
+                <span className="w-3 h-px bg-white/40" /> LinkedIn
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* HERO */}
       <main className="flex-grow flex flex-col items-center justify-center relative px-6 pt-64 md:pt-24 pb-32 z-10">

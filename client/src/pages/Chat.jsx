@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import io from 'socket.io-client';
+import socket from '../socket';
+import { playSendSound } from '../data/sounds';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare, Code2, Layers, Terminal, Paperclip, X, FileText, Download, Loader2 } from 'lucide-react';
@@ -14,7 +15,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:9000';
-const socket = io(SOCKET_URL, { autoConnect: false });
+// socket imported from ../socket
 
 const CLOUD_NAME = 'dvdd218yw';
 const UPLOAD_PRESET = 'o3ywg1ms';
@@ -369,6 +370,7 @@ const Chat = ({ user, setAuth }) => {
       replyTo: replyToMsg ? { _id: replyToMsg._id, senderName: replyToMsg.senderName, text: replyToMsg.text } : null
     });
     
+    playSendSound();
     setInputText('');
     setReplyToMsg(null);
   };
