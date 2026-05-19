@@ -1,115 +1,361 @@
-# <img src="client/public/logo.png" width="40" height="40" style="border-radius: 50%;"> Chatify Protocol
+# <img src="client/public/logo.png" width="42" height="42" style="border-radius:50%;"> Chatify
 
-> **The next-generation collaborative workspace for technical teams.** 
-> Execute logic, visualize algorithms, and sync your workflow in real-time.
+<div align="center">
 
-[![Status](https://img.shields.io/badge/System-Online-3b82f6?style=flat-square)](#)
-[![Version](https://img.shields.io/badge/Version-2.0.4-white?style=flat-square)](#)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](#)
+### **A Real-Time Collaborative Workspace for Developers**
 
----
+Build, communicate, execute, and visualize — all inside one synchronized environment.
 
-## 🌌 Overview
+[![Live Status](https://img.shields.io/badge/System-Online-3b82f6?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-2.0.4-ffffff?style=for-the-badge)](#)
+[![License](https://img.shields.io/badge/License-MIT-2563eb?style=for-the-badge)](#)
 
-**Chatify** is a high-performance MERN-stack application engineered for developers who need more than just a chat app. It combines real-time communication with a suite of technical tools—including shared compilers and data structure visualizers—all wrapped in a premium, minimalist HUD-style interface.
+<br/>
 
-### [🚀 Launch Dashboard](https://chhatify.netlify.app/)
+### 🌐 Live Preview
 
----
+### **[Launch Chatify →](https://chhatify.netlify.app/)**
 
-## ✨ Core Capabilities
-
-### 💻 Live Compilation
-Execute JavaScript, Python, and C++ in a shared environment. Collaborative coding with instant synchronization and shared terminal output.
-
-### 📊 DSA Visualizer
-Watch your data structures come to life. An interactive playground for visualizing algorithms, linked lists, trees, and graphs with real-time state manipulation.
-
-### 💬 Logic Streams
-Context-aware communication. Chatify integrates messaging directly into your files, allowing you to discuss logic exactly where it is written.
-
-### 🔒 Secure Shards
-Identity-based access control with end-to-end encryption. Create personal "shards" for sensitive snippets, private logic development, and protected documentation.
+</div>
 
 ---
 
-## 🛠️ Technical Stack
+# ✨ What is Chatify?
 
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | React 18, Framer Motion, Lucide Icons |
-| **Styling** | Vanilla CSS + Tailwind (HUD Components) |
-| **Backend** | Node.js, Express |
-| **Database** | MongoDB (Mongoose) |
-| **Real-time** | Socket.io (Global Mesh) |
-| **Visuals** | OGL (WebGL), Canvas API |
+**Chatify** is a modern MERN-stack collaboration platform designed for developers and technical teams who need more than basic messaging.
+
+It combines:
+
+* ⚡ Real-time communication
+* 💻 Shared coding environments
+* 📊 Interactive DSA visualizations
+* 🔐 Secure workspaces
+* 🌌 Modern HUD-inspired UI
+
+Everything syncs instantly using Socket.io, allowing teams to collaborate seamlessly in a single intelligent workspace.
 
 ---
 
-## 🚀 Installation & Setup
+# 🧠 Core Features
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB (Local or Atlas)
-- NPM or Yarn
+## 💬 Real-Time Messaging
 
-### 1. Clone the Mesh
+Fast and synchronized communication powered by Socket.io with instant event updates across connected clients.
+
+## 💻 Collaborative Code Execution
+
+Run and share code directly inside the platform.
+
+### Supported Languages
+
+* JavaScript
+* Python
+* C++
+
+Features include:
+
+* Shared compiler sessions
+* Live synchronization
+* Real-time output streaming
+* Collaborative debugging
+
+---
+
+## 📊 DSA Visualizer
+
+Visualize algorithms and data structures interactively.
+
+### Supported Concepts
+
+* Linked Lists
+* Trees
+* Graphs
+* Sorting Algorithms
+* Searching Algorithms
+
+Built for:
+
+* Students
+* Interview preparation
+* Teaching
+* Technical demonstrations
+
+---
+
+## 🔒 Secure Shards
+
+Private workspaces for storing:
+
+* Sensitive snippets
+* Personal notes
+* Protected logic
+* Draft implementations
+
+Security includes:
+
+* JWT Authentication
+* Protected routes
+* Access-controlled shards
+* Encrypted communication over TLS
+
+---
+
+## 🎨 Modern HUD Interface
+
+A futuristic minimal interface crafted for developers.
+
+### UI Highlights
+
+* Framer Motion animations
+* Glassmorphism elements
+* Responsive layouts
+* Smooth transitions
+* Interactive visual effects
+* WebGL + Canvas powered visuals
+
+---
+
+# 🛠️ Tech Stack
+
+| Category         | Technology                    |
+| ---------------- | ----------------------------- |
+| Frontend         | React 18                      |
+| Backend          | Node.js, Express              |
+| Database         | MongoDB + Mongoose            |
+| Real-Time Engine | Socket.io                     |
+| Animation        | Framer Motion                 |
+| Styling          | Tailwind CSS + Custom HUD CSS |
+| Icons            | Lucide React                  |
+| Graphics         | OGL, Canvas API               |
+
+---
+
+# 📂 Project Structure
+
+```bash
+collaboratePlatform/
+│
+├── client/          # React Frontend
+├── server/          # Node + Express Backend
+├── socket/          # Real-time event handlers
+├── visualizer/      # DSA visualizer logic
+└── README.md
+```
+
+---
+
+# 🚀 Getting Started
+
+## 1️⃣ Clone Repository
+
 ```bash
 git clone https://github.com/SoumyaranjanDS/collaboratePlatform.git
 cd collaboratePlatform
 ```
 
-### 2. Configure Environment
-Create a `.env` file in the `/server` directory:
+---
+
+## 2️⃣ Install Dependencies
+
+### Backend Setup
+
+```bash
+cd server
+npm install
+```
+
+### Frontend Setup
+
+```bash
+cd ../client
+npm install
+```
+
+---
+
+## 3️⃣ Configure Environment Variables
+
+Create a `.env` file inside the `server` directory.
+
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_secret_key
 ```
 
-### 3. Initialize Nodes
-```bash
-# Setup Server
-cd server
-npm install
-npm run dev
+---
 
-# Setup Client
-cd ../client
-npm install
+## 4️⃣ Start Development Servers
+
+### Run Backend
+
+```bash
+cd server
+npm run dev
+```
+
+### Run Frontend
+
+```bash
+cd client
 npm run dev
 ```
 
 ---
 
-## 🔮 Future Features (Roadmap)
+# 🌍 Contribution Guide
 
-We are constantly refining the Chatify protocol. Here is what's coming next:
+We welcome developers, designers, and contributors from all backgrounds.
 
-- [ ] **AI Logic Oracle**: Integrated LLM for real-time code suggestions and algorithm optimization within the compiler.
-- [ ] **Expanded Runtime**: Support for Rust, Go, and Ruby execution environments.
-- [ ] **Voice Shards**: Low-latency spatial audio rooms for seamless pair-programming sessions.
-- [ ] **Git Mesh**: Native GitHub/GitLab integration to pull repositories directly into a shared workspace.
-- [ ] **Mobile Interface**: A dedicated React Native application for monitoring logic streams on the go.
-- [ ] **Custom Themes**: User-defined color palettes for the HUD and editor.
+Whether you want to:
 
----
+* Fix bugs
+* Improve UI/UX
+* Add algorithms
+* Optimize performance
+* Add new compiler runtimes
+* Improve documentation
 
-## 🛡️ Security Protocol
-
-Chatify utilizes identity-based access control. All communication is synchronized through the **Global Mesh** (Socket.io), ensuring that only authorized nodes can access specific logic shards. Data is encrypted in transit using industry-standard TLS.
+Your contribution is appreciated ❤️
 
 ---
 
-## 👨‍💻 Developed By
+## 🛠️ How to Contribute
 
-**SoumyaranjanDS**  
-[soumya.site](https://soumya.site) | [LinkedIn](https://linkedin.com) | [GitHub](https://github.com/SoumyaranjanDS)
+### 1. Fork the Repository
+
+Click the **Fork** button on GitHub.
 
 ---
 
-<p align="center">
-  <img src="client/public/logo.png" width="100" height="100" style="border-radius: 50%; opacity: 0.2;">
-  <br>
-  <span style="opacity: 0.3; font-size: 10px; text-transform: uppercase; letter-spacing: 5px;">&copy; 2026 Chatify Laboratory</span>
-</p>
+### 2. Clone Your Fork
+
+```bash
+git clone https://github.com/YOUR_USERNAME/collaboratePlatform.git
+```
+
+---
+
+### 3. Create a Feature Branch
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+---
+
+### 4. Make Changes
+
+Implement your improvements or fixes.
+
+---
+
+### 5. Commit Your Changes
+
+```bash
+git commit -m "Added amazing feature"
+```
+
+---
+
+### 6. Push to GitHub
+
+```bash
+git push origin feature/amazing-feature
+```
+
+---
+
+### 7. Open a Pull Request
+
+Create a PR describing:
+
+* What you changed
+* Why you changed it
+* Screenshots (if UI related)
+
+---
+
+# 📌 Contribution Ideas
+
+Here are some areas where contributors can help:
+
+* 🌙 Dark/Light themes
+* 🤖 AI-assisted coding
+* 🧠 More DSA visualizations
+* 📱 Mobile responsiveness
+* 🔥 Performance optimization
+* 🌍 Multi-language support
+* 🎙️ Voice collaboration
+* 🧩 Plugin system
+
+---
+
+# 🔮 Future Roadmap
+
+* [ ] AI Logic Assistant
+* [ ] Multi-language Runtime Support
+* [ ] GitHub/GitLab Integration
+* [ ] Voice Collaboration Rooms
+* [ ] React Native Mobile App
+* [ ] Team Workspace System
+* [ ] Docker Deployment Support
+* [ ] Multiplayer Whiteboard
+* [ ] Code Replay Sessions
+
+---
+
+# 🛡️ Security
+
+Chatify follows secure development practices using:
+
+* JWT-based Authentication
+* Route Protection
+* Encrypted Transport (TLS)
+* Secure Socket Connections
+* Environment-based Secret Management
+
+---
+
+# 📸 Preview
+
+<div align="center">
+
+| Dashboard     | Compiler       | Visualizer             |
+| ------------- | -------------- | ---------------------- |
+| Modern HUD UI | Shared Runtime | Interactive Algorithms |
+
+</div>
+
+---
+
+# 👨‍💻 Developer
+
+## **Soumyaranjan Sahoo**
+
+🌐 Portfolio: [https://soumya.site](https://soumya.site)
+💼 LinkedIn: [https://linkedin.com](https://linkedin.com)
+🐙 GitHub: [https://github.com/SoumyaranjanDS](https://github.com/SoumyaranjanDS)
+
+---
+
+# ⭐ Support the Project
+
+If you like this project:
+
+* ⭐ Star the repository
+* 🍴 Fork the project
+* 🛠️ Contribute improvements
+* 📢 Share with developers
+
+---
+
+<div align="center">
+
+<img src="client/public/logo.png" width="90" height="90" style="border-radius:50%; opacity:0.25;" />
+
+### CHATIFY • REAL-TIME DEVELOPER COLLABORATION
+
+<sub>© 2026 Chatify Laboratory</sub>
+
+</div>
