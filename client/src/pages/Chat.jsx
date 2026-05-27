@@ -4,12 +4,8 @@ import socket from '../socket';
 import { playSendSound, playReceiveSound, playCallIncomingSound, playHangupSound, unlockAudio } from '../data/sounds';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-<<<<<<< HEAD
 import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare, Code2, Layers, Terminal, Paperclip, X, FileText, Download, Loader2, Phone, AlertOctagon, ShieldAlert, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-=======
-import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare, Code2, Layers, Terminal, Paperclip, X, FileText, Download, Loader2, Phone } from 'lucide-react';
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
 import Sidebar from '../components/Sidebar';
 import Whiteboard from '../components/Whiteboard';
 import CodeTemplates from '../components/CodeTemplates';
@@ -248,7 +244,6 @@ const Chat = ({ user, setAuth }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [activeVideoCall, setActiveVideoCall] = useState(null);
   const [incomingCall, setIncomingCall] = useState(null);
-<<<<<<< HEAD
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState('');
@@ -265,8 +260,7 @@ const Chat = ({ user, setAuth }) => {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportTarget, setReportTarget] = useState('');
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
+
 
   // Ask for notification permission and unlock AudioContext on user interaction
   useEffect(() => {
@@ -298,13 +292,9 @@ const Chat = ({ user, setAuth }) => {
         if (prev.some(m => m._id === msg._id)) return prev;
         return [...prev, msg];
       });
-<<<<<<< HEAD
-      
       if (msg.senderName !== user) {
         playReceiveSound();
       }
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
       
       // If message is for me, and I have this chat open, mark it as read immediately
       if (msg.recipientName === user && msg.senderName === selectedChat) {
@@ -365,7 +355,6 @@ const Chat = ({ user, setAuth }) => {
 
     socket.on('incoming-call', ({ from, offer }) => {
       setIncomingCall({ from, offer });
-<<<<<<< HEAD
       if (incomingCallAudioRef.current) {
         incomingCallAudioRef.current.pause();
       }
@@ -410,18 +399,6 @@ const Chat = ({ user, setAuth }) => {
     socket.on('admin-warning', ({ warningText }) => {
       setAdminWarningText(warningText);
       setShowAdminWarning(true);
-=======
-    });
-
-    socket.on('call-rejected', () => {
-      setIncomingCall(null);
-      setActiveVideoCall(null);
-    });
-
-    socket.on('end-call', () => {
-      setIncomingCall(null);
-      setActiveVideoCall(null);
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     });
 
     return () => {
@@ -438,15 +415,10 @@ const Chat = ({ user, setAuth }) => {
       socket.off('message-reaction-update');
       socket.off('messages-read');
       socket.off('incoming-call');
-<<<<<<< HEAD
       socket.off('call-accepted');
       socket.off('call-rejected');
       socket.off('end-call');
       socket.off('admin-warning');
-=======
-      socket.off('call-rejected');
-      socket.off('end-call');
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     };
   }, [selectedChat, user]);
 
@@ -606,27 +578,21 @@ const Chat = ({ user, setAuth }) => {
 
   const handleAcceptCall = () => {
     if (!incomingCall) return;
-<<<<<<< HEAD
     if (incomingCallAudioRef.current) {
       incomingCallAudioRef.current.pause();
       incomingCallAudioRef.current = null;
     }
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     setActiveVideoCall({ peer: incomingCall.from, isCaller: false, offer: incomingCall.offer });
     setIncomingCall(null);
   };
 
   const handleDeclineCall = () => {
     if (!incomingCall) return;
-<<<<<<< HEAD
     if (incomingCallAudioRef.current) {
       incomingCallAudioRef.current.pause();
       incomingCallAudioRef.current = null;
     }
     playHangupSound();
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     socket.emit('call-rejected', { to: incomingCall.from });
     setIncomingCall(null);
   };
@@ -636,7 +602,6 @@ const Chat = ({ user, setAuth }) => {
     setActiveVideoCall({ peer: selectedChat, isCaller: true });
   };
 
-<<<<<<< HEAD
   const handleCallEnded = () => {
     const hasReviewed = localStorage.getItem('hasReviewed') === 'true';
     if (hasReviewed) return;
@@ -673,9 +638,6 @@ const Chat = ({ user, setAuth }) => {
       toast.error('Failed to submit report');
     }
   };
-
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
   return (
     <div className="h-[100dvh] flex bg-dark-bg overflow-hidden text-slate-200 font-sans">
       <div className={`${isSidebarOpen ? 'w-full' : 'w-0'} md:w-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shrink-0 border-r border-white/5 bg-[#0a0c10]`}>
@@ -711,7 +673,6 @@ const Chat = ({ user, setAuth }) => {
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">@{user}</span>
             </div>
             {selectedChat && selectedChat !== 'placeholder' && selectedChat !== user && (
-<<<<<<< HEAD
               <>
                 <button onClick={handleStartCall} title="Start Video Call"
                   className="p-2.5 md:p-2 rounded-xl transition-all bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white">
@@ -724,12 +685,6 @@ const Chat = ({ user, setAuth }) => {
                   <AlertOctagon size={18} />
                 </button>
               </>
-=======
-              <button onClick={handleStartCall} title="Start Video Call"
-                className="p-2.5 md:p-2 rounded-xl transition-all bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white">
-                <Phone size={18} />
-              </button>
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
             )}
             <button onClick={() => { setActivePanel(activePanel === 'templates' ? null : 'templates'); setIsWhiteboardActive(false); }} title="Code Templates"
               className={`p-2.5 md:p-2 rounded-xl transition-all ${activePanel === 'templates' ? 'bg-accent-indigo text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}>
@@ -855,7 +810,6 @@ const Chat = ({ user, setAuth }) => {
       </div>
 
       {activeVideoCall && (
-<<<<<<< HEAD
         <>
           <VideoCall
             socket={socket}
@@ -886,16 +840,6 @@ const Chat = ({ user, setAuth }) => {
             </div>
           )}
         </>
-=======
-        <VideoCall 
-          socket={socket} 
-          currentUser={user} 
-          peerUser={activeVideoCall.peer} 
-          isCaller={activeVideoCall.isCaller} 
-          incomingOffer={activeVideoCall.offer} 
-          onCallEnded={() => setActiveVideoCall(null)} 
-        />
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
       )}
 
       {incomingCall && (
@@ -923,8 +867,6 @@ const Chat = ({ user, setAuth }) => {
           </div>
         </div>
       )}
-<<<<<<< HEAD
-
       {showReviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md">
           <div className="bg-[#0c091f]/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl max-w-md w-full mx-4 shadow-2xl flex flex-col relative">
@@ -1063,8 +1005,6 @@ const Chat = ({ user, setAuth }) => {
           </div>
         </div>
       )}
-=======
->>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     </div>
   );
 };
