@@ -59,8 +59,11 @@ export const login = async (req, res) => {
       user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
       await user.save();
 
-      // Send OTP to email
-      await sendMail({
+      // Log OTP to server console as a fallback
+      console.log(`[OTP] Generated code for ${user.email} (${user.username}): ${otp}`);
+
+      // Send OTP to email asynchronously (non-blocking)
+      sendMail({
         to: user.email,
         subject: 'Your Chatify Access Code',
         html: `
@@ -74,8 +77,8 @@ export const login = async (req, res) => {
             <p style="font-size: 12px; color: #45a29e;">This code will expire in 5 minutes. Do not share this code with anyone.</p>
           </div>
         `
-      });
-
+      }).catch(err => console.error('[Mailer] Async OTP email sending failed:', err));
+ 
       res.json({ status: 'OTP_SENT', message: 'Verification code sent to your email.' });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
