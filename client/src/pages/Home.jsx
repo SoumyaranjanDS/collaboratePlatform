@@ -3,26 +3,226 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import ShinyText from '../components/ShinyText';
-import DarkVeil from '../components/DarkVeil';
-
 import {
   ArrowRight,
   Terminal,
   Layers3,
   MessageSquare,
-  Code2,
-  Users,
-  Shield,
+  Video,
+  PenTool,
   Zap,
-  Globe,
   Menu,
   X,
-  Activity,
-  Cpu,
-  Lock,
+  Play,
+  Monitor,
+  Laptop,
+  Code2,
+  Sparkles
 } from 'lucide-react';
 
-// Custom Social Icons
+const InteractiveWorkspaceBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const mouse = { x: null, y: null, radius: 180 };
+
+    const handleMouseMove = (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
+    const codeTokens = ['{ }', '&&', '=>', '[]', '< />', '()', 'socket.io', 'webRTC', 'v8', 'const', 'import'];
+    const particles = [];
+    const particleCount = 75;
+
+    class Particle {
+      constructor() {
+        this.reset();
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+      }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 2 + 1;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        
+        this.isToken = Math.random() < 0.25;
+        this.token = codeTokens[Math.floor(Math.random() * codeTokens.length)];
+        this.alpha = Math.random() * 0.5 + 0.2;
+        this.colorIndex = Math.floor(Math.random() * 4);
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < -50 || this.x > width + 50 || this.y < -50 || this.y > height + 50) {
+          this.reset();
+          if (Math.random() < 0.5) {
+            this.x = Math.random() < 0.5 ? -10 : width + 10;
+          } else {
+            this.y = Math.random() < 0.5 ? -10 : height + 10;
+          }
+        }
+
+        if (mouse.x !== null && mouse.y !== null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < mouse.radius) {
+            const force = (mouse.radius - distance) / mouse.radius;
+            this.x += (dx / distance) * force * 0.65;
+            this.y += (dy / distance) * force * 0.65;
+          }
+        }
+      }
+
+      draw() {
+        const themeColors = [
+          `rgba(99, 102, 241, ${this.alpha})`,
+          `rgba(139, 92, 246, ${this.alpha})`,
+          `rgba(236, 72, 153, ${this.alpha})`,
+          `rgba(45, 212, 191, ${this.alpha})`
+        ];
+        const color = themeColors[this.colorIndex];
+
+        if (this.isToken) {
+          ctx.font = '500 10px "Fira Code", monospace';
+          ctx.fillStyle = color;
+          ctx.fillText(this.token, this.x, this.y);
+        } else {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = color;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    const gridSpacing = 80;
+    const drawInteractiveGrid = () => {
+      ctx.strokeStyle = 'rgba(31, 26, 58, 0.2)';
+      ctx.lineWidth = 0.5;
+
+      for (let x = 0; x < width; x += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < height; y += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      if (mouse.x !== null && mouse.y !== null) {
+        const startX = Math.floor((mouse.x - mouse.radius) / gridSpacing) * gridSpacing;
+        const endX = Math.ceil((mouse.x + mouse.radius) / gridSpacing) * gridSpacing;
+        const startY = Math.floor((mouse.y - mouse.radius) / gridSpacing) * gridSpacing;
+        const endY = Math.ceil((mouse.y + mouse.radius) / gridSpacing) * gridSpacing;
+
+        for (let x = startX; x <= endX; x += gridSpacing) {
+          for (let y = startY; y <= endY; y += gridSpacing) {
+            const dx = mouse.x - x;
+            const dy = mouse.y - y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < mouse.radius) {
+              const alpha = (1 - distance / mouse.radius) * 0.35;
+              ctx.beginPath();
+              ctx.arc(x, y, 2, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`;
+              ctx.shadowBlur = 4;
+              ctx.shadowColor = 'rgba(168, 85, 247, 0.8)';
+              ctx.fill();
+              ctx.shadowBlur = 0;
+            }
+          }
+        }
+      }
+    };
+
+    const drawConnections = () => {
+      const maxDistance = 120;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < maxDistance) {
+            const alpha = (1 - dist / maxDistance) * 0.15;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    };
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      drawInteractiveGrid();
+      particles.forEach((p) => {
+        p.update();
+        p.draw();
+      });
+      drawConnections();
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60" />;
+};
+
 const LinkedInIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
@@ -41,6 +241,16 @@ const InstagramIcon = ({ size = 18 }) => (
   </svg>
 );
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 25 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.215, 0.61, 0.355, 1] } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
 const Home = () => {
   const [users, setUsers] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -51,16 +261,15 @@ const Home = () => {
   const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username || 'guest'}`;
 
   useEffect(() => {
-    api.get('/chat/users').then((res) => setUsers(res.data));
+    api.get('/chat/users').then((res) => setUsers(res.data)).catch(() => {});
   }, []);
 
-  const handleNavigation = (mode, panel = null) => {
-    if (!isLoggedIn) {
+  const handleLaunch = () => {
+    if (isLoggedIn) {
+      navigate('/chat');
+    } else {
       navigate('/login');
-      return;
     }
-    navigate('/chat', { state: { initialMode: mode, initialPanel: panel } });
-    setIsMobileMenuOpen(false);
   };
 
   const scrollToFeatures = () => {
@@ -69,273 +278,357 @@ const Home = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen bg-[#050505] text-[#a1a1aa] font-sans selection:bg-blue-500/30 flex flex-col relative overflow-x-hidden"
-    >
+    <div className="min-h-screen bg-[#020108] text-slate-400 font-sans selection:bg-indigo-500/30 flex flex-col relative overflow-x-hidden">
       
-      {/* BACKGROUND LAYER */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 opacity-100">
-          <DarkVeil hueShift={0} noiseIntensity={0} scanlineIntensity={0} speed={0.5} scanlineFrequency={0} warpAmount={0} />
-        </div>
-      </div>
+      {/* Large Glowing Ambient Orbs */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none z-0" />
+      <div className="absolute top-[20%] right-1/4 w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[150px] pointer-events-none z-0" />
+      
+      <InteractiveWorkspaceBackground />
 
-      {/* NAVBAR */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl">
-        <div className="backdrop-blur-xl border border-white/10 bg-[#050505]/60 rounded-full px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+      {/* HEADER / NAVBAR */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-6xl">
+        <motion.div 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="backdrop-blur-xl border border-white/[0.08] bg-[#0c091f]/40 rounded-2xl px-6 py-4 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+        >
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-            <img src="/logo.png" alt="logo" className="w-7 h-7 object-contain rounded-full border border-white/10 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">Chatify</span>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.5)] group-hover:rotate-12 transition-all duration-300">
+              <MessageSquare size={16} className="text-white" />
+            </div>
+            <span className="text-white text-xs font-black tracking-[0.3em] uppercase bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Chatify</span>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={scrollToFeatures} className="text-[9px] font-bold tracking-widest uppercase hover:text-white transition-all hover:scale-105 active:scale-95">Features</button>
-            <button onClick={() => navigate('/docs')} className="text-[9px] font-bold tracking-widest uppercase hover:text-white transition-all hover:scale-105 active:scale-95">Docs</button>
-            <button onClick={() => navigate('/status')} className="text-[9px] font-bold tracking-widest uppercase hover:text-white transition-all hover:scale-105 active:scale-95">Status</button>
+            <button onClick={scrollToFeatures} className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hover:text-white transition-colors relative group">
+              Features
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+            </button>
+            <button onClick={() => navigate('/docs')} className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hover:text-white transition-colors relative group">
+              Docs
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+            </button>
+            <button onClick={() => navigate('/status')} className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hover:text-white transition-colors relative group">
+              Status
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300" />
+            </button>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-6">
               {isLoggedIn ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity" onClick={() => navigate('/chat')}>
-                    <img src={avatarUrl} alt="profile" className="w-5 h-5 rounded-full border border-white/20" />
-                    <span className="text-white text-[9px] font-medium tracking-widest uppercase">{username}</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 cursor-pointer bg-white/5 border border-white/[0.08] rounded-full px-3.5 py-1.5 hover:bg-white/10 transition-all" onClick={() => navigate('/chat')}>
+                    <img src={avatarUrl} alt="profile" className="w-5 h-5 rounded-full border border-white/10" />
+                    <span className="text-white text-[9px] font-bold tracking-wider uppercase">@{username}</span>
                   </div>
-                  <div className="w-[1px] h-3 bg-white/10" />
-                  <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="text-[9px] font-bold tracking-widest uppercase text-white/40 hover:text-red-400 transition-colors">Exit</button>
+                  <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="text-[10px] font-bold tracking-widest uppercase text-slate-500 hover:text-red-400 transition-colors">Logout</button>
                 </div>
               ) : (
-                <button onClick={() => navigate('/login')} className="text-white text-[9px] font-bold tracking-widest uppercase bg-blue-600 px-5 py-2 rounded-full hover:bg-blue-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 active:scale-95">Launch</button>
+                <button onClick={() => navigate('/login')} className="text-white text-[10px] font-bold tracking-widest uppercase bg-indigo-600 px-6 py-2.5 rounded-full hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]">Launch App</button>
               )}
             </div>
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className="md:hidden text-white/50 hover:text-white transition-colors p-2"
+              className="md:hidden text-slate-400 hover:text-white transition-colors p-2"
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
-
-        </div>
+        </motion.div>
       </nav>
 
+      {/* MOBILE NAV PANEL */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
-            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
-            animate={{ opacity: 1, backdropFilter: 'blur(24px)' }} 
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-40 md:hidden bg-[#050505]/90 flex flex-col justify-center items-start pl-8 sm:pl-12"
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }} 
+            transition={{ duration: 0.3 }}
+            className="fixed top-24 left-[5%] right-[5%] z-45 md:hidden bg-[#0a0717]/95 border border-white/10 rounded-2xl p-6 shadow-2xl backdrop-blur-xl flex flex-col gap-4"
           >
-            <div className="absolute top-0 right-0 w-full h-full pointer-events-none overflow-hidden">
-              <div className="absolute -top-1/4 -right-1/4 w-full h-[150%] bg-blue-500/10 blur-[120px] rounded-full" />
-              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              <div className="absolute left-6 sm:left-10 top-0 w-px h-full bg-gradient-to-b from-transparent via-white/5 to-transparent" />
-            </div>
-
-            <motion.div 
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={{
-                animate: { transition: { staggerChildren: 0.1 } }
-              }}
-              className="flex flex-col gap-6 relative z-10 w-full pr-8"
-            >
-              {[
-                { label: '01. Features', action: scrollToFeatures },
-                { label: '02. Documentation', action: () => navigate('/docs') },
-                { label: '03. System Status', action: () => navigate('/status') },
-                { label: isLoggedIn ? '04. Dashboard' : '04. Launch App', action: () => navigate(isLoggedIn ? '/chat' : '/login') }
-              ].map((item, i) => (
-                <motion.button
-                  key={item.label}
-                  variants={{
-                    initial: { opacity: 0, x: -30, skewX: -5 },
-                    animate: { opacity: 1, x: 0, skewX: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-                    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
-                  }}
-                  onClick={() => { item.action(); setIsMobileMenuOpen(false); }}
-                  className="text-white text-4xl sm:text-6xl font-bold tracking-tighter hover:text-blue-500 transition-colors text-left flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6 group w-full"
-                >
-                  <span className="text-blue-500/60 text-sm sm:text-base font-mono tracking-widest">{item.label.split('.')[0]}.</span>
-                  <span className="group-hover:translate-x-4 transition-transform duration-300 leading-none">{item.label.split('.')[1]}</span>
-                </motion.button>
-              ))}
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="absolute bottom-12 left-8 sm:left-12 flex gap-6 z-10"
-            >
-              <a href="https://github.com/SoumyaranjanDS" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors text-[10px] font-mono tracking-widest uppercase flex items-center gap-2">
-                <span className="w-3 h-px bg-white/40" /> GitHub
-              </a>
-              <a href="https://www.linkedin.com/in/soumyaranjanlink/" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors text-[10px] font-mono tracking-widest uppercase flex items-center gap-2">
-                <span className="w-3 h-px bg-white/40" /> LinkedIn
-              </a>
-            </motion.div>
+            <button onClick={scrollToFeatures} className="py-3 text-left text-sm font-bold tracking-wider text-slate-300 border-b border-white/5 hover:text-white transition-colors">Features</button>
+            <button onClick={() => navigate('/docs')} className="py-3 text-left text-sm font-bold tracking-wider text-slate-300 border-b border-white/5 hover:text-white transition-colors">Docs</button>
+            <button onClick={() => navigate('/status')} className="py-3 text-left text-sm font-bold tracking-wider text-slate-300 border-b border-white/5 hover:text-white transition-colors">Status</button>
+            <button onClick={handleLaunch} className="w-full mt-2 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold tracking-wider hover:bg-indigo-500 transition-colors shadow-lg">
+              {isLoggedIn ? 'Go to Dashboard' : 'Launch App'}
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* HERO */}
-      <main className="flex-grow flex flex-col items-center justify-center relative px-6 pt-64 md:pt-24 pb-32 z-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="max-w-5xl w-full text-center">
-          <h1 className="text-5xl sm:text-7xl md:text-9xl font-normal text-white tracking-tighter leading-[1.05] mb-10">
-            <ShinyText text="Code Sync." speed={3} color="#ffffff" shineColor="#3b82f6" />
-            <br />
-            <span className="italic"><ShinyText text="Redefined." speed={3} color="#ffffff" shineColor="#3b82f6" /></span>
-          </h1>
-          <p className="text-xs sm:text-sm md:text-lg max-w-2xl mx-auto leading-relaxed mb-16 opacity-50 px-4">
-            The next-generation collaborative workspace for technical teams. Real-time compilers, algorithm visualizers, and secure logic shards.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 px-4">
-            <button onClick={() => handleNavigation('global')} className="group flex items-center gap-3 px-16 py-5 bg-white text-black rounded-sm font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-blue-50 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-              Start Building <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+      {/* HERO SECTION */}
+      <section className="flex flex-col items-center justify-center text-center px-6 pt-36 md:pt-48 pb-20 relative z-10">
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="max-w-5xl w-full flex flex-col items-center"
+        >
+
+          {/* <motion.div
+            variants={fadeUp}
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-code tracking-[0.2em] uppercase mb-8 shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+          >
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            Universal Collaboration Protocol
+          </motion.div> */}
+
+          <motion.h1 
+            variants={fadeUp}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold text-white tracking-tight leading-[0.95] mb-8 font-syne uppercase"
+          >
+            Where Technical <br className="hidden sm:inline" /> Teams <br />
+            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(99,102,241,0.4)]">
+              Connect & Create.
+            </span>
+          </motion.h1>
+
+          <motion.p 
+            variants={fadeUp}
+            className="text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed mb-12 text-slate-400 font-sans"
+          >
+            Chatify integrates real-time communications, shared code runtimes, synced vector whiteboards, and visual data structure models. Everything synchronized instantly over WebSocket gates.
+          </motion.p>
+
+          <motion.div 
+            variants={fadeUp}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
+          >
+            <button 
+              onClick={handleLaunch} 
+              className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 text-white font-extrabold text-xs uppercase tracking-[0.2em] rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_4px_30px_rgba(99,102,241,0.4)] flex items-center justify-center gap-2"
+            >
+              Get Started Free <ArrowRight size={14} />
             </button>
-          </div>
-          <div className="mt-20 flex items-center justify-center gap-6 text-[10px] font-bold tracking-[0.4em] uppercase opacity-30">
-            <div className="flex -space-x-2">
-              {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-[#050505] bg-blue-900 flex items-center justify-center text-[8px]">{i}</div>)}
+            <button 
+              onClick={scrollToFeatures} 
+              className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/[0.08] text-white font-extrabold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-white/10 hover:scale-105 active:scale-95 transition-all"
+            >
+              See Capabilities
+            </button>
+          </motion.div>
+
+          {/* SaaS Workspace Product Preview Mockup */}
+          <motion.div 
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.4, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full mt-24 max-w-5xl rounded-2xl border border-white/10 bg-[#0e0a24]/50 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden relative group backdrop-blur-sm select-none"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-700" />
+            
+            {/* Mockup Title bar */}
+            <div className="h-12 border-b border-white/[0.08] bg-[#070514]/80 px-6 flex items-center justify-between">
+              <div className="flex gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500/60" />
+                <span className="w-3 h-3 rounded-full bg-amber-500/60" />
+                <span className="w-3 h-3 rounded-full bg-green-500/60" />
+              </div>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-slate-500">chatify_workspace_sandbox</span>
+              <div className="w-16" />
             </div>
-            <span>{users.length || 24}+ Nodes Active</span>
-          </div>
+
+            {/* Mockup Workspace Shell Layout */}
+            <div className="grid grid-cols-12 h-auto md:h-[480px]">
+              {/* Sidebar Mock */}
+              <div className="hidden md:flex md:col-span-3 border-r border-white/[0.08] bg-[#070514]/40 p-4 flex-col gap-4 text-left">
+                <div className="w-full h-8 rounded-lg bg-white/5 border border-white/5 flex items-center px-3 gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Active Channels</span>
+                </div>
+                <div className="space-y-2">
+                  {['Global Lobby', 'Frontend team', 'DSA prep room'].map((room, i) => (
+                    <div key={room} className={`h-10 rounded-xl flex items-center px-3 justify-between ${i === 0 ? 'bg-indigo-600/10 border border-indigo-500/20 text-white' : 'text-slate-500 hover:text-slate-400'}`}>
+                      <span className="text-[9px] font-bold">#{room}</span>
+                      {i === 0 && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat & Active panels Mock */}
+              <div className="col-span-12 md:col-span-9 bg-[#0b081e]/20 p-4 md:p-6 flex flex-col justify-between relative min-h-[420px] md:min-h-[480px]">
+                {/* Visual Panel Mock */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 pb-14 sm:pb-0">
+                  {/* Left: Synchronized Whiteboard Mock */}
+                  <div className="border border-dashed border-white/10 rounded-2xl bg-black/30 p-4 flex flex-col justify-between relative overflow-hidden group/board min-h-[140px] sm:min-h-0">
+                    <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1.5px)] bg-[size:16px_16px]" />
+                    <div className="flex items-center justify-between relative z-10">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                        <PenTool size={10} className="text-violet-400" /> Real-time Canvas
+                      </span>
+                      <span className="w-3 h-3 rounded-full bg-indigo-500/20 flex items-center justify-center text-[6px] text-indigo-400 font-bold border border-indigo-500/30">Active</span>
+                    </div>
+                    {/* Stylized vector drawing shape mock */}
+                    <div className="flex-1 flex items-center justify-center relative my-2">
+                      <svg className="w-16 h-16 sm:w-24 sm:h-24 text-indigo-500/20" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5,5" />
+                        <rect x="35" y="35" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                      {/* Synced cursors mock */}
+                      <div className="absolute top-[40%] left-[60%] flex items-center gap-1">
+                        <svg className="w-3 h-3 text-indigo-400 rotate-45" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span className="text-[6px] font-mono bg-indigo-500 text-white px-1 py-0.5 rounded-sm">@alex</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Compiling Sandbox Mock */}
+                  <div className="border border-white/5 rounded-2xl bg-black/40 p-4 flex flex-col justify-between text-left relative overflow-hidden min-h-[140px] sm:min-h-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                        <Terminal size={10} className="text-fuchsia-400" /> live_sandbox.js
+                      </span>
+                      <Play size={10} className="text-emerald-400 cursor-pointer" />
+                    </div>
+                    {/* Simulated Code Lines */}
+                    <div className="font-mono text-[7px] space-y-1.5 text-slate-400 mt-2 sm:mt-3 flex-1">
+                      <p><span className="text-indigo-400">const</span> compiler = () =&gt; &#123;</p>
+                      <p className="pl-3 text-slate-500">// Auto-compiles live inside the room</p>
+                      <p className="pl-3"><span className="text-fuchsia-400">console</span>.log(<span className="text-emerald-400">"Output Synced!"</span>);</p>
+                      <p>&#125;;</p>
+                    </div>
+                    {/* Simulated output console */}
+                    <div className="h-8 rounded-lg bg-black border border-white/5 px-2 flex items-center text-[6px] font-mono text-emerald-400 mt-2">
+                      &gt; Output Synced!
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call Overlay PIP Mock */}
+                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 w-24 h-32 sm:w-28 sm:h-36 border border-white/10 rounded-xl overflow-hidden bg-[#0d071d]/90 shadow-2xl flex flex-col justify-between p-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[6px] font-mono bg-black/60 px-1 py-0.5 rounded-md text-slate-300">You</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  </div>
+                  {/* Avatar graphic representation */}
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 mx-auto flex items-center justify-center text-[9px] sm:text-[10px] text-white font-black shadow-lg">
+                    U
+                  </div>
+                  <div className="flex justify-center gap-1">
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-white/5 flex items-center justify-center text-[5px] sm:text-[6px]">🎤</span>
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-red-600/20 text-red-500 flex items-center justify-center text-[5px] sm:text-[6px]">📞</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
-      </main>
+      </section>
 
-      {/* BENTO FEATURE GRID */}
-      <section id="features" className="relative z-10 py-32 px-6 md:px-12 border-t border-white/5 bg-[#050505]/60 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-24">
-            <h2 className="text-white text-[11px] font-bold tracking-[0.5em] uppercase mb-4 text-blue-500">Capabilities</h2>
-            <h3 className="text-4xl md:text-6xl text-white tracking-tighter max-w-2xl">Engineered for the modern developer.</h3>
+      {/* BENTO GRID CAPABILITIES */}
+      <section id="features" className="relative z-10 py-32 px-6 md:px-12 border-t border-white/5 bg-[#03000b]/80 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-24 text-center md:text-left">
+            <h2 className="text-indigo-400 text-xs font-bold tracking-[0.4em] uppercase mb-4">Capabilities</h2>
+            <h3 className="text-4xl md:text-6xl text-white font-extrabold tracking-tight font-futuristic">Built for modern tech workflows.</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[240px]">
-            {/* WIDE CARD: LIVE COMPILATION */}
-            <div className="md:col-span-2 p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group flex flex-col justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+            {/* Bento Card 1: Calls & Screen Share */}
+            <div className="md:col-span-2 p-8 border border-white/[0.04] bg-[#0c0920]/20 hover:bg-[#0c0920]/40 transition-all rounded-3xl group flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div className="absolute top-0 right-0 w-44 h-44 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
               <div>
-                <Terminal className="text-blue-500 mb-6" size={28} />
-                <h4 className="text-white text-xl font-medium mb-3">Live Compilation</h4>
-                <p className="text-sm leading-relaxed opacity-40 max-w-md">Execute JavaScript, Python, and C++ in a shared environment with sub-millisecond synchronization.</p>
+                <Video className="text-indigo-400 mb-6" size={28} />
+                <h4 className="text-white text-xl font-bold mb-3 font-futuristic">Instant Video & Screen Sharing</h4>
+                <p className="text-sm leading-relaxed text-slate-400 max-w-md">Launch 1-on-1 video calls directly from direct messages. Toggle video devices, mute mic, or share your screen seamlessly during call streams.</p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold tracking-widest uppercase opacity-20">
-                <span>V8 Engine</span>
-                <span>Python 3.10</span>
-                <span>Clang 15</span>
+              <div className="flex items-center gap-4 text-[9px] font-mono uppercase tracking-widest text-slate-500">
+                <span>WebRTC Native</span>
+                <span>Screen Capture</span>
+                <span>Track Substitution</span>
               </div>
             </div>
 
-            {/* TALL CARD: DSA VISUALIZER */}
-            <div className="md:row-span-2 p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group flex flex-col justify-between overflow-hidden relative">
-              <div className="relative z-10">
-                <Layers3 className="text-blue-500 mb-6" size={28} />
-                <h4 className="text-white text-xl font-medium mb-3">DSA Visualizer</h4>
-                <p className="text-sm leading-relaxed opacity-40">Step through algorithms with interactive node animations.</p>
+            {/* Bento Card 2: Synced Whiteboard */}
+            <div className="p-8 border border-white/[0.04] bg-[#0c0920]/20 hover:bg-[#0c0920]/40 transition-all rounded-3xl group flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div>
+                <PenTool className="text-purple-400 mb-6" size={28} />
+                <h4 className="text-white text-xl font-bold mb-3 font-futuristic">Shared Canvas</h4>
+                <p className="text-sm leading-relaxed text-slate-400">Sketch designs, document logic, and sync drawings in real-time with cursor tracking.</p>
               </div>
-              <div className="absolute -bottom-10 -right-10 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Activity size={200} className="text-blue-500" strokeWidth={1} />
+              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-500">Sync Vector Board</span>
+            </div>
+
+            {/* Bento Card 3: JS Code Sandbox */}
+            <div className="p-8 border border-white/[0.04] bg-[#0c0920]/20 hover:bg-[#0c0920]/40 transition-all rounded-3xl group flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div>
+                <Terminal className="text-fuchsia-400 mb-6" size={28} />
+                <h4 className="text-white text-xl font-bold mb-3 font-futuristic">Live Code Compiler</h4>
+                <p className="text-sm leading-relaxed text-slate-400">Write JavaScript code with integrated pre-built templates and execute synchronously with real-time logger outputs.</p>
               </div>
-              <div className="relative z-10 flex flex-col gap-2">
-                {['Linked Lists', 'Binary Trees', 'Graphs', 'Sorting'].map(tag => (
-                  <span key={tag} className="text-[9px] font-bold tracking-widest uppercase border border-white/10 px-3 py-1 rounded-full w-fit">{tag}</span>
+              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-500">V8 sandbox runtime</span>
+            </div>
+
+            {/* Bento Card 4: DSA Visualizer */}
+            <div className="md:col-span-2 p-8 border border-white/[0.04] bg-[#0c0920]/20 hover:bg-[#0c0920]/40 transition-all rounded-3xl group flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+              <div>
+                <Layers3 className="text-violet-400 mb-6" size={28} />
+                <h4 className="text-white text-xl font-bold mb-3 font-futuristic">DSA Algorithm Visualizer</h4>
+                <p className="text-sm leading-relaxed text-slate-400 max-w-md">Step through core algorithms (Sorting, Searching, Linked Lists, Trees, and Graph node networks) dynamically with visual state animation nodes.</p>
+              </div>
+              <div className="flex gap-2">
+                {['Linked Lists', 'BST Trees', 'Graph Paths'].map(concept => (
+                  <span key={concept} className="text-[8px] font-bold tracking-widest uppercase border border-white/5 bg-white/5 px-2.5 py-1 rounded-md text-slate-400">{concept}</span>
                 ))}
               </div>
-            </div>
-
-            {/* NORMAL CARD: LOGIC STREAMS */}
-            <div className="p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group">
-              <MessageSquare className="text-blue-500 mb-6" size={28} />
-              <h4 className="text-white text-lg font-medium mb-3">Logic Streams</h4>
-              <p className="text-xs leading-relaxed opacity-40">Context-aware chat built into your files. Discuss logic exactly where it's written.</p>
-            </div>
-
-            {/* NORMAL CARD: SECURE SHARDS */}
-            <div className="p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group">
-              <Shield className="text-blue-500 mb-6" size={28} />
-              <h4 className="text-white text-lg font-medium mb-3">Secure Shards</h4>
-              <p className="text-xs leading-relaxed opacity-40">End-to-end encrypted personal rooms for sensitive code snippets.</p>
-            </div>
-
-            {/* WIDE CARD: GLOBAL MESH */}
-            <div className="md:col-span-2 lg:col-span-3 p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group flex items-center justify-between gap-12">
-              <div className="max-w-md">
-                <Globe className="text-blue-500 mb-6" size={28} />
-                <h4 className="text-white text-xl font-medium mb-3">Global Mesh</h4>
-                <p className="text-sm leading-relaxed opacity-40">Sync your workspace across devices instantly with 99.9% uptime and low-latency routing.</p>
-              </div>
-              <div className="hidden lg:flex flex-1 justify-around opacity-10">
-                <Zap size={60} />
-                <Cpu size={60} />
-                <Lock size={60} />
-              </div>
-            </div>
-
-            {/* SMALL CARD: LOW LATENCY */}
-            <div className="p-8 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group">
-              <Activity className="text-blue-500 mb-6" size={28} />
-              <h4 className="text-white text-lg font-medium mb-3">Low Latency</h4>
-              <p className="text-xs leading-relaxed opacity-40">Built on high-performance logic gates for sub-50ms synchronization.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 w-full bg-[#050505] border-t border-white/5 pt-32 pb-16 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24 mb-24">
+      <footer className="relative z-10 w-full bg-[#020108] border-t border-white/5 pt-24 pb-16 px-6 md:px-12 text-slate-500">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24 mb-20">
             <div className="md:col-span-1">
-              <div className="flex items-center gap-3 mb-8">
-                <img src="/logo.png" alt="logo" className="w-7 h-7 object-contain rounded-full border border-white/10" />
-                <span className="text-white text-[10px] font-bold tracking-[0.4em] uppercase">Chatify</span>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <MessageSquare size={16} className="text-white" />
+                </div>
+                <span className="text-white text-xs font-black tracking-[0.3em] uppercase">Chatify</span>
               </div>
-              <p className="text-[11px] leading-relaxed opacity-30 max-w-[280px]">
-                Architecting the future of technical collaboration. 
-                Synchronized logic, zero-latency mesh.
+              <p className="text-[11px] leading-relaxed opacity-60 max-w-[280px]">
+                Architecting the future of real-time developer workspace collaboration. Fully synchronized environment.
               </p>
             </div>
             
             <div>
-              <h5 className="text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-8 opacity-80">Connect</h5>
-              <div className="flex flex-col gap-4 text-[10px] font-medium uppercase tracking-widest opacity-30">
-                <a href="https://www.linkedin.com/in/soumyaranjanlink/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white hover:opacity-100 transition-all"><LinkedInIcon size={12} /> LinkedIn</a>
-                <a href="https://github.com/SoumyaranjanDS" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white hover:opacity-100 transition-all"><GitHubIcon size={12} /> GitHub</a>
-                <a href="https://www.instagram.com/_.soumya_28?igsh=MW51OTV2bnc3aHdxaQ==" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white hover:opacity-100 transition-all"><InstagramIcon size={12} /> Instagram</a>
+              <h5 className="text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-6">Connect</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-medium uppercase tracking-widest opacity-60">
+                <a href="https://www.linkedin.com/in/soumyaranjanlink/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors"><LinkedInIcon size={12} /> LinkedIn</a>
+                <a href="https://github.com/SoumyaranjanDS" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors"><GitHubIcon size={12} /> GitHub</a>
+                <a href="https://www.instagram.com/_.soumya_28?igsh=MW51OTV2bnc3aHdxaQ==" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors"><InstagramIcon size={12} /> Instagram</a>
               </div>
             </div>
 
             <div>
-              <h5 className="text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-8 opacity-80">Legal</h5>
-              <div className="flex flex-col gap-4 text-[10px] font-medium uppercase tracking-widest opacity-30">
-                <button onClick={() => navigate('/privacy')} className="text-left hover:text-white hover:opacity-100 transition-all">Privacy Policy</button>
-                <button onClick={() => navigate('/terms')} className="text-left hover:text-white hover:opacity-100 transition-all">Terms of Use</button>
+              <h5 className="text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-6">Legal</h5>
+              <div className="flex flex-col gap-3 text-[10px] font-medium uppercase tracking-widest opacity-60">
+                <button onClick={() => navigate('/privacy')} className="text-left hover:text-white transition-colors">Privacy Policy</button>
+                <button onClick={() => navigate('/terms')} className="text-left hover:text-white transition-colors">Terms of Use</button>
               </div>
             </div>
           </div>
 
-          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[10px] font-bold tracking-[0.3em] uppercase">
-            <div className="flex items-center gap-6 opacity-20">
-              <p>&copy; {new Date().getFullYear()} Chatify Laboratory</p>
-              <div className="w-[1px] h-3 bg-white/40 hidden md:block" />
-              <p className="hidden md:block">Universal Protocol v2.4.0</p>
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-[10px] font-bold tracking-[0.25em] uppercase">
+            <div className="flex items-center gap-4 opacity-50">
+              <p>&copy; {new Date().getFullYear()} Chatify Lab</p>
+              <div className="w-[1px] h-3 bg-white/10 hidden md:block" />
+              <p className="hidden md:block">Universal Protocol v2.6.0</p>
             </div>
             <p>
-              <span className="opacity-20 lowercase italic font-normal tracking-normal mr-2">developed by</span>
+              <span className="opacity-45 lowercase italic font-normal tracking-normal mr-1.5">developed by</span>
               <a 
                 href="https://soumya.site" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-white hover:text-blue-500 transition-colors"
+                className="text-white hover:text-indigo-400 transition-colors"
               >
                 soumya
               </a>
@@ -343,7 +636,7 @@ const Home = () => {
           </div>
         </div>
       </footer>
-    </motion.div>
+    </div>
   );
 };
 

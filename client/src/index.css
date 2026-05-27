@@ -12,9 +12,25 @@
 }
 
 :root {
-  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #050505;
   color: #a1a1aa;
+}
+
+.font-futuristic {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-space {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-syne {
+  font-family: 'Syne', sans-serif;
+}
+
+.font-code {
+  font-family: 'Fira Code', monospace;
 }
 
 html {
@@ -109,5 +125,14 @@ body {
 
 .animate-pan {
   animation: pan 20s linear infinite;
+}
+
+.doodle-bg {
+  background-color: #04030a;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0, transparent 45%),
+    radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.05) 0, transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.015)' stroke-width='1'%3E%3Cpath d='M10 10h10v10H10zM50 40h5v5h-5zM15 50l5 5m-5 0l5-5'/%3E%3Ccircle cx='60' cy='15' r='1' fill='rgba(255,255,255,0.015)'/%3E%3Ccircle cx='25' cy='65' r='1.5' fill='rgba(255,255,255,0.015)'/%3E%3Cpath d='M40 70h8m-4-4v8' stroke-width='0.8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%, 100% 100%, 80px 80px;
 }
 

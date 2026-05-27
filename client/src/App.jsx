@@ -15,6 +15,7 @@ import Docs from './pages/Docs';
 import Status from './pages/Status';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AnimatedRoutes({ auth, setAuth }) {
   const location = useLocation();
@@ -30,6 +31,7 @@ function AnimatedRoutes({ auth, setAuth }) {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/chat" element={auth ? <Chat user={auth} setAuth={setAuth} /> : <Navigate to="/login" />} />
+        <Route path="/admin" element={auth ? <AdminDashboard /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </AnimatePresence>

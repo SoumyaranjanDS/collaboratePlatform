@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Search, MessageSquare, Globe, LayoutDashboard } from 'lucide-react';
+import { LogOut, Search, MessageSquare, Globe, LayoutDashboard, ShieldAlert } from 'lucide-react';
 
 const Sidebar = ({ user, allUsers, onlineList, onLogout, selectedChat, setSelectedChat, unreadCounts }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,6 +112,16 @@ const Sidebar = ({ user, allUsers, onlineList, onLogout, selectedChat, setSelect
         >
           <MessageSquare size={20} />
         </button>
+
+        {localStorage.getItem('role') === 'admin' && (
+          <button 
+            className="w-12 h-12 rounded-full shadow-neo-out flex items-center justify-center text-slate-500 hover:text-indigo-400 transition-all active:shadow-neo-in"
+            onClick={() => navigate('/admin')}
+            title="Admin Panel"
+          >
+            <ShieldAlert size={20} />
+          </button>
+        )}
 
         <button 
           className="w-12 h-12 rounded-full shadow-neo-out flex items-center justify-center text-slate-500 hover:text-red-500 transition-all active:shadow-neo-in" 

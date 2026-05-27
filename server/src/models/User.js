@@ -5,7 +5,11 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   avatar: { type: String, default: 'avatar1' },
-  isOnline: { type: Boolean, default: false }
+  isOnline: { type: Boolean, default: false },
+  otp: { type: String },
+  otpExpires: { type: Date },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  warnings: { type: [String], default: [] }
 }, { timestamps: true });
 
 export default mongoose.model('User', UserSchema);

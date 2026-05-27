@@ -8,6 +8,7 @@ import { connectDB } from './config/db.js';
 // Routes
 import authRoutes from './routes/auth.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 
 // Socket
 import { chatSocket } from './socket/chat.socket.js';
@@ -24,11 +25,13 @@ app.use(express.json());
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: process.env.CLIENT_URL || '*' }
 });
+app.set('io', io);
 
 // Initialize Socket.io
 chatSocket(io);

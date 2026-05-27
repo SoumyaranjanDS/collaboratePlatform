@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Message from '../models/Message.js';
+import { sendMail } from '../utils/mailer.js';
 
 let onlineUsers = {};
 
@@ -7,9 +8,10 @@ export const chatSocket = (io) => {
   io.on('connection', (socket) => {
     socket.on('join-chat', async (username) => {
       onlineUsers[socket.id] = username;
+      socket.join(username);
       await User.findOneAndUpdate({ username }, { isOnline: true });
       io.emit('user-status-change', { username, status: 'online' });
-      io.emit('online-users-list', Object.values(onlineUsers));
+      io.emit('online-users', Object.values(onlineUsers));
     });
 
     // UPDATED: Added Pagination (limit and skip)
@@ -52,6 +54,27 @@ export const chatSocket = (io) => {
         const recipientSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === recipientName);
         if (recipientSocketId) {
           io.to(recipientSocketId).emit('message-received', messageData);
+        } else {
+          // Recipient is offline! Send email notification asynchronously
+          User.findOne({ username: recipientName }).then(recipientUser => {
+            if (recipientUser && recipientUser.email) {
+              sendMail({
+                to: recipientUser.email,
+                subject: `New message from @${senderName}`,
+                html: `
+                  <div style="font-family: sans-serif; background-color: #0b0c10; color: #c5c6c7; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid #1f2833;">
+                    <h2 style="color: #ff4d4d; text-transform: uppercase; letter-spacing: 2px;">Chatify</h2>
+                    <p>Hello <strong>@${recipientName}</strong>,</p>
+                    <p>You received a new message from <strong>@${senderName}</strong> while you were away:</p>
+                    <div style="background-color: #1f2833; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ff4d4d; color: #ffffff;">
+                      ${isPhantom ? '👻 [Phantom Message - Hidden]' : (text || '📎 Sent an attachment')}
+                    </div>
+                    <p style="font-size: 13px; color: #a1a1aa;">Log in to <a href="https://chhatify.netlify.app/" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">Chatify</a> to join the discussion and respond.</p>
+                  </div>
+                `
+              }).catch(err => console.error('Error sending message notification email:', err));
+            }
+          }).catch(err => console.error('Error looking up recipient for offline email:', err));
         }
         socket.emit('message-received', messageData);
       } else {
@@ -170,13 +193,76 @@ export const chatSocket = (io) => {
       }
     });
 
+    // === VIDEO CALL SIGNALING ===
+    socket.on('call-user', (data) => {
+      const { to, offer } = data;
+      const from = onlineUsers[socket.id];
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('incoming-call', { from, offer });
+      } else {
+        // Target recipient is offline! Send missed call email notification
+        User.findOne({ username: to }).then(recipientUser => {
+          if (recipientUser && recipientUser.email) {
+            sendMail({
+              to: recipientUser.email,
+              subject: `Missed call from @${from}`,
+              html: `
+                <div style="font-family: sans-serif; background-color: #0b0c10; color: #c5c6c7; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid #1f2833;">
+                  <h2 style="color: #ff4d4d; text-transform: uppercase; letter-spacing: 2px;">Chatify</h2>
+                  <p>Hello <strong>@${to}</strong>,</p>
+                  <p>You have a missed call from <strong>@${from}</strong> on Chatify:</p>
+                  <div style="background-color: #1f2833; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ff4d4d; color: #ffffff; font-weight: bold; text-align: center;">
+                    📹 Missed Video Call Session
+                  </div>
+                  <p style="font-size: 13px; color: #a1a1aa;">Log in to <a href="https://chhatify.netlify.app/" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">Chatify</a> to call them back.</p>
+                </div>
+              `
+            }).catch(err => console.error('Error sending call notification email:', err));
+          }
+        }).catch(err => console.error('Error looking up recipient for offline call email:', err));
+      }
+    });
+
+    socket.on('call-accepted', (data) => {
+      const { to, answer } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('call-accepted', { answer });
+      }
+    });
+
+    socket.on('call-rejected', (data) => {
+      const { to } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('call-rejected');
+      }
+    });
+
+    socket.on('ice-candidate', (data) => {
+      const { to, candidate } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('ice-candidate', { candidate });
+      }
+    });
+
+    socket.on('end-call', (data) => {
+      const { to } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('end-call');
+      }
+    });
+
     socket.on('disconnect', async () => {
       const username = onlineUsers[socket.id];
       if (username) {
         delete onlineUsers[socket.id];
         await User.findOneAndUpdate({ username }, { isOnline: false });
         io.emit('user-status-change', { username, status: 'offline' });
-        io.emit('online-users-list', Object.values(onlineUsers));
+        io.emit('online-users', Object.values(onlineUsers));
       }
     });
   });
