@@ -170,6 +170,48 @@ export const chatSocket = (io) => {
       }
     });
 
+    // === VIDEO CALL SIGNALING ===
+    socket.on('call-user', (data) => {
+      const { to, offer } = data;
+      const from = onlineUsers[socket.id];
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('incoming-call', { from, offer });
+      }
+    });
+
+    socket.on('call-accepted', (data) => {
+      const { to, answer } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('call-accepted', { answer });
+      }
+    });
+
+    socket.on('call-rejected', (data) => {
+      const { to } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('call-rejected');
+      }
+    });
+
+    socket.on('ice-candidate', (data) => {
+      const { to, candidate } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('ice-candidate', { candidate });
+      }
+    });
+
+    socket.on('end-call', (data) => {
+      const { to } = data;
+      const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('end-call');
+      }
+    });
+
     socket.on('disconnect', async () => {
       const username = onlineUsers[socket.id];
       if (username) {

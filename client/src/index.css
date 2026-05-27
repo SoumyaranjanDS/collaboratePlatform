@@ -12,9 +12,25 @@
 }
 
 :root {
-  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #050505;
   color: #a1a1aa;
+}
+
+.font-futuristic {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-space {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-syne {
+  font-family: 'Syne', sans-serif;
+}
+
+.font-code {
+  font-family: 'Fira Code', monospace;
 }
 
 html {

@@ -4,12 +4,13 @@ import socket from '../socket';
 import { playSendSound } from '../data/sounds';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare, Code2, Layers, Terminal, Paperclip, X, FileText, Download, Loader2 } from 'lucide-react';
+import { Menu, Send, Globe, ChevronUp, Ghost, PenTool, MessageSquare, Code2, Layers, Terminal, Paperclip, X, FileText, Download, Loader2, Phone } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Whiteboard from '../components/Whiteboard';
 import CodeTemplates from '../components/CodeTemplates';
 import DSAVisualizer from '../components/DSAVisualizer';
 import CodeEditor from '../components/CodeEditor';
+import VideoCall from '../components/VideoCall';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -218,6 +219,8 @@ const Chat = ({ user, setAuth }) => {
   
   const [pendingFile, setPendingFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeVideoCall, setActiveVideoCall] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
 
   // Ask for notification permission
   useEffect(() => {
@@ -234,7 +237,10 @@ const Chat = ({ user, setAuth }) => {
     socket.on('online-users', (users) => setOnlineList(users));
 
     socket.on('message-received', (msg) => {
-      setMessages(prev => [...prev, msg]);
+      setMessages(prev => {
+        if (prev.some(m => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
       
       // If message is for me, and I have this chat open, mark it as read immediately
       if (msg.recipientName === user && msg.senderName === selectedChat) {
@@ -293,6 +299,20 @@ const Chat = ({ user, setAuth }) => {
       }
     });
 
+    socket.on('incoming-call', ({ from, offer }) => {
+      setIncomingCall({ from, offer });
+    });
+
+    socket.on('call-rejected', () => {
+      setIncomingCall(null);
+      setActiveVideoCall(null);
+    });
+
+    socket.on('end-call', () => {
+      setIncomingCall(null);
+      setActiveVideoCall(null);
+    });
+
     return () => {
       socket.off('online-users');
       socket.off('message-received');
@@ -303,6 +323,9 @@ const Chat = ({ user, setAuth }) => {
       socket.off('message-deleted');
       socket.off('message-reaction-update');
       socket.off('messages-read');
+      socket.off('incoming-call');
+      socket.off('call-rejected');
+      socket.off('end-call');
     };
   }, [selectedChat, user]);
 
@@ -403,13 +426,30 @@ const Chat = ({ user, setAuth }) => {
 
   const handleLogout = () => { localStorage.clear(); setAuth(null); navigate('/login'); };
 
+  const handleAcceptCall = () => {
+    if (!incomingCall) return;
+    setActiveVideoCall({ peer: incomingCall.from, isCaller: false, offer: incomingCall.offer });
+    setIncomingCall(null);
+  };
+
+  const handleDeclineCall = () => {
+    if (!incomingCall) return;
+    socket.emit('call-rejected', { to: incomingCall.from });
+    setIncomingCall(null);
+  };
+
+  const handleStartCall = () => {
+    if (!selectedChat || selectedChat === 'placeholder') return;
+    setActiveVideoCall({ peer: selectedChat, isCaller: true });
+  };
+
   return (
     <div className="h-[100dvh] flex bg-dark-bg overflow-hidden text-slate-200 font-sans">
       <div className={`${isSidebarOpen ? 'w-full' : 'w-0'} md:w-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shrink-0 border-r border-white/5 bg-[#0a0c10]`}>
         <Sidebar 
           allUsers={allUsers} onlineList={onlineList}
           selectedChat={selectedChat} setSelectedChat={(c) => { setSelectedChat(c); setIsSidebarOpen(false); }}
-          currentUser={user} onLogout={handleLogout} unreadCounts={unreadCounts}
+          user={user} onLogout={handleLogout} unreadCounts={unreadCounts}
         />
       </div>
 
@@ -433,6 +473,16 @@ const Chat = ({ user, setAuth }) => {
           </div>
           
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/5 shrink-0 select-none mr-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-indigo shrink-0"></span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">@{user}</span>
+            </div>
+            {selectedChat && selectedChat !== 'placeholder' && selectedChat !== user && (
+              <button onClick={handleStartCall} title="Start Video Call"
+                className="p-2.5 md:p-2 rounded-xl transition-all bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white">
+                <Phone size={18} />
+              </button>
+            )}
             <button onClick={() => { setActivePanel(activePanel === 'templates' ? null : 'templates'); setIsWhiteboardActive(false); }} title="Code Templates"
               className={`p-2.5 md:p-2 rounded-xl transition-all ${activePanel === 'templates' ? 'bg-accent-indigo text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}>
               <Code2 size={18} />
@@ -555,6 +605,43 @@ const Chat = ({ user, setAuth }) => {
           </>
         )}
       </div>
+
+      {activeVideoCall && (
+        <VideoCall 
+          socket={socket} 
+          currentUser={user} 
+          peerUser={activeVideoCall.peer} 
+          isCaller={activeVideoCall.isCaller} 
+          incomingOffer={activeVideoCall.offer} 
+          onCallEnded={() => setActiveVideoCall(null)} 
+        />
+      )}
+
+      {incomingCall && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md">
+          <div className="bg-[#0e1117] border border-white/10 p-8 rounded-3xl max-w-sm w-full mx-4 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-accent-indigo/20 text-accent-indigo rounded-full flex items-center justify-center animate-bounce mb-6">
+              <Phone size={32} />
+            </div>
+            <h3 className="text-xl font-extrabold text-white mb-2">Incoming Video Call</h3>
+            <p className="text-slate-400 text-sm mb-6">@{incomingCall.from} is calling you...</p>
+            <div className="flex gap-4 w-full">
+              <button 
+                onClick={handleDeclineCall} 
+                className="flex-1 py-3 bg-red-600/20 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white rounded-2xl transition-all font-bold"
+              >
+                Decline
+              </button>
+              <button 
+                onClick={handleAcceptCall} 
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl transition-all font-bold"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
