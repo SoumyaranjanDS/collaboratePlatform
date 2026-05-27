@@ -200,6 +200,7 @@ export const chatSocket = (io) => {
       const targetSocketId = Object.keys(onlineUsers).find(key => onlineUsers[key] === to);
       if (targetSocketId) {
         io.to(targetSocketId).emit('incoming-call', { from, offer });
+<<<<<<< HEAD
       } else {
         // Target recipient is offline! Send missed call email notification
         User.findOne({ username: to }).then(recipientUser => {
@@ -221,6 +222,8 @@ export const chatSocket = (io) => {
             }).catch(err => console.error('Error sending call notification email:', err));
           }
         }).catch(err => console.error('Error looking up recipient for offline call email:', err));
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
       }
     });
 

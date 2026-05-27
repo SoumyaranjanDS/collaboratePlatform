@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Loader2, Monitor, SwitchCamera } from 'lucide-react';
 import toast from 'react-hot-toast';
+<<<<<<< HEAD
 import { playCallingSound, playHangupSound } from '../data/sounds';
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
 
 const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onCallEnded }) => {
   const [localStream, setLocalStream] = useState(null);
@@ -15,11 +18,15 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
   const remoteVideoRef = useRef(null);
   const pcRef = useRef(null);
   const screenStreamRef = useRef(null);
+<<<<<<< HEAD
   const callingAudioRef = useRef(null);
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
 
   const configuration = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
+<<<<<<< HEAD
       { urls: 'stun:stun1.l.google.com:19302' },
       {
         urls: [
@@ -30,6 +37,9 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         username: '000000002095261722',
         credential: 'wAC6QhCoSu0jPqxKYpun82d09z4='
       }
+=======
+      { urls: 'stun:stun1.l.google.com:19302' }
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     ]
   };
 
@@ -83,12 +93,17 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         };
 
         if (isCaller) {
+<<<<<<< HEAD
           callingAudioRef.current = playCallingSound();
           const offer = await pc.createOffer();
           if (!isMounted) {
             if (callingAudioRef.current) {
               callingAudioRef.current.pause();
             }
+=======
+          const offer = await pc.createOffer();
+          if (!isMounted) {
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
             pc.close();
             return;
           }
@@ -106,9 +121,12 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         }
 
         if (!isMounted) {
+<<<<<<< HEAD
           if (callingAudioRef.current) {
             callingAudioRef.current.pause();
           }
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
           pc.close();
           return;
         }
@@ -119,10 +137,13 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
 
         socket.on('call-accepted', async ({ answer }) => {
           if (!isMounted) return;
+<<<<<<< HEAD
           if (callingAudioRef.current) {
             callingAudioRef.current.pause();
             callingAudioRef.current = null;
           }
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
           if (pcRef.current && pcRef.current.signalingState === 'have-local-offer' && !isSettingDescription) {
             isSettingDescription = true;
             try {
@@ -185,9 +206,12 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
     return () => {
       isMounted = false;
       clearTimeout(timer);
+<<<<<<< HEAD
       if (callingAudioRef.current) {
         callingAudioRef.current.pause();
       }
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
       socket.off('call-accepted');
       socket.off('ice-candidate');
       socket.off('call-rejected');
@@ -351,11 +375,14 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
 
   const cleanupCall = () => {
     setCallState('ended');
+<<<<<<< HEAD
     playHangupSound();
     if (callingAudioRef.current) {
       callingAudioRef.current.pause();
       callingAudioRef.current = null;
     }
+=======
+>>>>>>> 965c28a563988d32b5329d00ce26b236a8c45987
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
