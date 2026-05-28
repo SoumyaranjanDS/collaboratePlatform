@@ -3,13 +3,17 @@ import { Mic, MicOff, Video, VideoOff, PhoneOff, Loader2, Monitor, SwitchCamera 
 import toast from 'react-hot-toast';
 import { playCallingSound, playHangupSound } from '../data/sounds';
 
+const isMobileDevice = () =>
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onCallEnded }) => {
   const [localStream, setLocalStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [callState, setCallState] = useState('connecting'); // 'connecting', 'connected', 'ended'
+  const [callState, setCallState] = useState('connecting');
   const [facingMode, setFacingMode] = useState('user');
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isMobile] = useState(isMobileDevice);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -33,12 +37,34 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
     ]
   };
 
+  // Build video constraints based on device
+  const getVideoConstraints = (facing = 'user') => {
+    if (isMobile) {
+      return {
+        facingMode: facing,
+        width: { ideal: 720 },
+        height: { ideal: 1280 },
+        aspectRatio: { ideal: 9 / 16 }
+      };
+    }
+    return {
+      facingMode: facing,
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      aspectRatio: { ideal: 16 / 9 }
+    };
+  };
+
   useEffect(() => {
     let isMounted = true;
     let stream;
+
     const initializeCall = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true });
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: getVideoConstraints(facingMode),
+          audio: true
+        });
         if (!isMounted) {
           mediaStream.getTracks().forEach(track => track.stop());
           return;
@@ -52,12 +78,8 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         const pc = new RTCPeerConnection(configuration);
         pcRef.current = pc;
 
-        // Add local tracks to peer connection
-        stream.getTracks().forEach(track => {
-          pc.addTrack(track, stream);
-        });
+        stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-        // Set remote stream
         pc.ontrack = (event) => {
           if (!isMounted) return;
           if (remoteVideoRef.current) {
@@ -66,17 +88,15 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
           }
         };
 
-        // Send ICE candidates
         pc.onicecandidate = (event) => {
           if (event.candidate && isMounted) {
             socket.emit('ice-candidate', { to: peerUser, candidate: event.candidate });
           }
         };
 
-        // Handle connection disconnect/failure
         pc.onconnectionstatechange = () => {
           if (!isMounted) return;
-          if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+          if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
             toast.error(`Connection lost with @${peerUser}`);
             cleanupCall();
           }
@@ -86,9 +106,7 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
           callingAudioRef.current = playCallingSound();
           const offer = await pc.createOffer();
           if (!isMounted) {
-            if (callingAudioRef.current) {
-              callingAudioRef.current.pause();
-            }
+            callingAudioRef.current?.pause();
             pc.close();
             return;
           }
@@ -97,23 +115,17 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         } else if (incomingOffer && pc.signalingState === 'stable') {
           await pc.setRemoteDescription(new RTCSessionDescription(incomingOffer));
           const answer = await pc.createAnswer();
-          if (!isMounted) {
-            pc.close();
-            return;
-          }
+          if (!isMounted) { pc.close(); return; }
           await pc.setLocalDescription(answer);
           socket.emit('call-accepted', { to: peerUser, answer });
         }
 
         if (!isMounted) {
-          if (callingAudioRef.current) {
-            callingAudioRef.current.pause();
-          }
+          callingAudioRef.current?.pause();
           pc.close();
           return;
         }
 
-        // Socket listeners inside hook
         const queuedIceCandidates = [];
         let isSettingDescription = false;
 
@@ -130,11 +142,8 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
               setCallState('connected');
               while (queuedIceCandidates.length > 0) {
                 const candidate = queuedIceCandidates.shift();
-                try {
-                  await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-                } catch (err) {
-                  console.error('Error adding queued ICE candidate:', err);
-                }
+                try { await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate)); }
+                catch (e) { console.error('ICE candidate error:', e); }
               }
             } catch (err) {
               console.error('Error setting remote description:', err);
@@ -145,18 +154,14 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         });
 
         socket.on('ice-candidate', async ({ candidate }) => {
-          if (!isMounted) return;
-          if (pcRef.current) {
-            try {
-              if (pcRef.current.remoteDescription && pcRef.current.remoteDescription.type) {
-                await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-              } else {
-                queuedIceCandidates.push(candidate);
-              }
-            } catch (err) {
-              console.error('Error adding ICE candidate:', err);
+          if (!isMounted || !pcRef.current) return;
+          try {
+            if (pcRef.current.remoteDescription?.type) {
+              await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+              queuedIceCandidates.push(candidate);
             }
-          }
+          } catch (err) { console.error('ICE error:', err); }
         });
 
         socket.on('call-rejected', () => {
@@ -172,179 +177,107 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
         });
       } catch (err) {
         if (!isMounted) return;
-        console.error('Failed to access media devices:', err);
-        toast.error('Could not start media stream. Verify permissions.');
+        console.error('Media device error:', err);
+        toast.error('Could not start media stream. Check camera/mic permissions.');
         cleanupCall();
       }
     };
 
-    const timer = setTimeout(() => {
-      initializeCall();
-    }, 100);
+    const timer = setTimeout(initializeCall, 100);
 
     return () => {
       isMounted = false;
       clearTimeout(timer);
-      if (callingAudioRef.current) {
-        callingAudioRef.current.pause();
-      }
+      callingAudioRef.current?.pause();
       socket.off('call-accepted');
       socket.off('ice-candidate');
       socket.off('call-rejected');
       socket.off('end-call');
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-      if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (pcRef.current) {
-        pcRef.current.close();
-      }
+      stream?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current?.getTracks().forEach(t => t.stop());
+      pcRef.current?.close();
     };
   }, [peerUser, isCaller, incomingOffer, socket]);
 
   const toggleMute = () => {
-    if (localStream) {
-      const audioTrack = localStream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
-      }
+    const audioTrack = localStream?.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setIsMuted(!audioTrack.enabled);
     }
   };
 
   const toggleVideo = () => {
-    if (localStream) {
-      const videoTrack = localStream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        setIsVideoOff(!videoTrack.enabled);
-      }
+    const videoTrack = localStream?.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setIsVideoOff(!videoTrack.enabled);
     }
   };
 
   const toggleCameraFacing = async () => {
-    if (isScreenSharing) {
-      toast.error("Cannot switch camera while screen sharing");
-      return;
-    }
+    if (isScreenSharing) { toast.error('Cannot switch camera while screen sharing'); return; }
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: nextMode },
+        video: getVideoConstraints(nextMode),
         audio: !isMuted
       });
-
       const newVideoTrack = newStream.getVideoTracks()[0];
-      if (pcRef.current) {
-        const senders = pcRef.current.getSenders();
-        const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
-        if (videoSender) {
-          await videoSender.replaceTrack(newVideoTrack);
-        }
-      }
-
-      if (localStream) {
-        localStream.getVideoTracks().forEach(track => track.stop());
-      }
-
-      const mergedStream = new MediaStream([
-        newVideoTrack,
-        ...(localStream ? localStream.getAudioTracks() : [])
-      ]);
-
-      setLocalStream(mergedStream);
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = mergedStream;
-      }
+      const videoSender = pcRef.current?.getSenders().find(s => s.track?.kind === 'video');
+      if (videoSender) await videoSender.replaceTrack(newVideoTrack);
+      localStream?.getVideoTracks().forEach(t => t.stop());
+      const merged = new MediaStream([newVideoTrack, ...(localStream?.getAudioTracks() || [])]);
+      setLocalStream(merged);
+      if (localVideoRef.current) localVideoRef.current.srcObject = merged;
       setFacingMode(nextMode);
       setIsVideoOff(false);
       toast.success(`Switched to ${nextMode === 'user' ? 'front' : 'rear'} camera`);
     } catch (err) {
-      console.error("Error switching camera:", err);
-      toast.error("Failed to switch camera device");
+      console.error('Camera switch error:', err);
+      toast.error('Failed to switch camera');
     }
   };
 
   const toggleScreenShare = async () => {
-    if (isScreenSharing) {
-      stopScreenShare();
-    } else {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        screenStreamRef.current = screenStream;
-        const screenTrack = screenStream.getVideoTracks()[0];
-
-        if (pcRef.current) {
-          const senders = pcRef.current.getSenders();
-          const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
-          if (videoSender) {
-            await videoSender.replaceTrack(screenTrack);
-          }
-        }
-
-        screenTrack.onended = () => {
-          stopScreenShare();
-        };
-
-        const mergedStream = new MediaStream([
-          screenTrack,
-          ...(localStream ? localStream.getAudioTracks() : [])
-        ]);
-
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = mergedStream;
-        }
-
-        setIsScreenSharing(true);
-        toast.success("Screen sharing started");
-      } catch (err) {
-        console.error("Error starting screen share:", err);
-        toast.error("Could not start screen sharing");
-      }
+    if (isScreenSharing) { stopScreenShare(); return; }
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      screenStreamRef.current = screenStream;
+      const screenTrack = screenStream.getVideoTracks()[0];
+      const videoSender = pcRef.current?.getSenders().find(s => s.track?.kind === 'video');
+      if (videoSender) await videoSender.replaceTrack(screenTrack);
+      screenTrack.onended = stopScreenShare;
+      const merged = new MediaStream([screenTrack, ...(localStream?.getAudioTracks() || [])]);
+      if (localVideoRef.current) localVideoRef.current.srcObject = merged;
+      setIsScreenSharing(true);
+      toast.success('Screen sharing started');
+    } catch (err) {
+      console.error('Screen share error:', err);
+      toast.error('Could not start screen sharing');
     }
   };
 
   const stopScreenShare = async () => {
-    if (screenStreamRef.current) {
-      screenStreamRef.current.getTracks().forEach(track => track.stop());
-      screenStreamRef.current = null;
-    }
-
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current = null;
     try {
       const cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
+        video: getVideoConstraints(facingMode),
         audio: !isMuted
       });
-
-      const cameraVideoTrack = cameraStream.getVideoTracks()[0];
-      if (pcRef.current) {
-        const senders = pcRef.current.getSenders();
-        const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
-        if (videoSender) {
-          await videoSender.replaceTrack(cameraVideoTrack);
-        }
-      }
-
-      if (localStream) {
-        localStream.getVideoTracks().forEach(track => track.stop());
-      }
-
-      const mergedStream = new MediaStream([
-        cameraVideoTrack,
-        ...(localStream ? localStream.getAudioTracks() : [])
-      ]);
-
-      setLocalStream(mergedStream);
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = mergedStream;
-      }
+      const cameraTrack = cameraStream.getVideoTracks()[0];
+      const videoSender = pcRef.current?.getSenders().find(s => s.track?.kind === 'video');
+      if (videoSender) await videoSender.replaceTrack(cameraTrack);
+      localStream?.getVideoTracks().forEach(t => t.stop());
+      const merged = new MediaStream([cameraTrack, ...(localStream?.getAudioTracks() || [])]);
+      setLocalStream(merged);
+      if (localVideoRef.current) localVideoRef.current.srcObject = merged;
       setIsScreenSharing(false);
       setIsVideoOff(false);
-      toast.success("Screen sharing stopped, camera restored");
+      toast.success('Camera restored');
     } catch (err) {
-      console.error("Error restoring camera after screen share:", err);
+      console.error('Stop screen share error:', err);
       setIsScreenSharing(false);
     }
   };
@@ -352,19 +285,10 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
   const cleanupCall = () => {
     setCallState('ended');
     playHangupSound();
-    if (callingAudioRef.current) {
-      callingAudioRef.current.pause();
-      callingAudioRef.current = null;
-    }
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
-    if (screenStreamRef.current) {
-      screenStreamRef.current.getTracks().forEach(track => track.stop());
-    }
-    if (pcRef.current) {
-      pcRef.current.close();
-    }
+    if (callingAudioRef.current) { callingAudioRef.current.pause(); callingAudioRef.current = null; }
+    localStream?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+    pcRef.current?.close();
     onCallEnded();
   };
 
@@ -374,107 +298,141 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
   };
 
   return (
-    <div className="absolute inset-0 bg-black/95 z-50 flex flex-col justify-between p-6">
-      {/* Peer Name Banner */}
-      <div className="text-center z-10">
-        <h2 className="text-xl font-bold text-white tracking-wide">Video Call with @{peerUser}</h2>
-        <p className="text-xs text-slate-500 uppercase mt-1 tracking-widest font-semibold">
-          {callState === 'connecting' ? 'Connecting to peer...' : 'Active Stream'}
+    <div className="fixed inset-0 bg-black z-50 flex flex-col" style={{ touchAction: 'none' }}>
+
+      {/* ── Header Banner ── */}
+      <div className="shrink-0 text-center pt-safe pt-4 pb-3 px-4 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <h2 className="text-base font-bold text-white tracking-wide">
+          📹 {peerUser}
+        </h2>
+        <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5 font-semibold">
+          {callState === 'connecting' ? 'Connecting...' : 'Live'}
         </p>
       </div>
 
-      {/* Main Video Section */}
-      <div className="flex-1 flex items-center justify-center relative w-full h-full max-h-[70vh] rounded-3xl overflow-hidden bg-black border border-white/5 shadow-2xl">
-        {/* Remote Video (Main view) */}
+      {/* ── Main Video Area ── */}
+      <div className="flex-1 relative overflow-hidden bg-black">
+
+        {/* Remote video — fills entire area, portrait on mobile */}
         <video
           ref={remoteVideoRef}
           autoPlay
           playsInline
-          className="w-full h-full object-cover rounded-3xl"
+          className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover' : 'object-contain'}`}
         />
 
-        {/* Remote Video Label Overlay */}
+        {/* Connecting overlay */}
+        {callState === 'connecting' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 gap-4 z-10">
+            <Loader2 className="animate-spin text-indigo-400" size={44} />
+            <span className="text-slate-400 text-sm font-semibold">Connecting to @{peerUser}...</span>
+          </div>
+        )}
+
+        {/* Connected label */}
         {callState === 'connected' && (
-          <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/5 select-none pointer-events-none z-10">
+          <div className="absolute top-3 left-3 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10 z-10 pointer-events-none">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">@{peerUser}</span>
           </div>
         )}
 
-        {callState === 'connecting' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-3">
-            <Loader2 className="animate-spin text-accent-indigo" size={40} />
-            <span className="text-slate-400 text-sm font-semibold">Connecting WebRTC Peer Connection...</span>
-          </div>
-        )}
-
-        {/* Local Video (PIP view) */}
-        <div className="absolute bottom-4 right-4 w-32 h-44 md:w-40 md:h-56 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-900 z-10">
+        {/* ── PIP Local Video ──
+            Mobile: top-right corner, portrait shape
+            Desktop: bottom-right corner, landscape shape */}
+        <div className={`absolute z-20 rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-slate-900
+          ${isMobile
+            ? 'top-3 right-3 w-24 h-36'
+            : 'bottom-4 right-4 w-36 h-24 md:w-44 md:h-28'
+          }`}
+        >
           <video
             ref={localVideoRef}
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover"
+            className={`w-full h-full ${isMobile ? 'object-cover' : 'object-cover'}`}
           />
-          {/* Local Video Label Overlay */}
-          <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/5 select-none pointer-events-none z-20">
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">You</span>
+          <div className="absolute bottom-1.5 left-2 px-1.5 py-0.5 bg-black/70 backdrop-blur-sm rounded-md pointer-events-none">
+            <span className="text-[7px] font-black uppercase tracking-wider text-slate-400">You</span>
           </div>
           {isVideoOff && (
-            <div className="absolute inset-0 bg-slate-900 flex items-center justify-center text-slate-600 z-10">
-              <VideoOff size={24} />
+            <div className="absolute inset-0 bg-slate-900 flex items-center justify-center z-10">
+              <VideoOff size={20} className="text-slate-600" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Control Buttons panel */}
-      <div className="flex justify-center items-center gap-4 md:gap-6 z-10 pb-4">
+      {/* ── Controls ── */}
+      <div className={`shrink-0 bg-black/90 backdrop-blur-md border-t border-white/5 flex items-center justify-center gap-3 md:gap-5 pb-safe
+        ${isMobile ? 'py-4 px-4' : 'py-5 px-6'}`}
+      >
+        {/* Mute */}
         <button
           onClick={toggleMute}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-            isMuted ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-          }`}
-          title={isMuted ? 'Unmute Mic' : 'Mute Mic'}
+          className={`flex flex-col items-center gap-1 group`}
+          title={isMuted ? 'Unmute' : 'Mute'}
         >
-          {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all
+            ${isMuted ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-white/8 text-slate-300 border border-white/10 group-hover:bg-white/15'}`}>
+            {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
+          </div>
+          <span className="text-[9px] text-slate-500 uppercase tracking-widest">{isMuted ? 'Unmute' : 'Mute'}</span>
         </button>
 
+        {/* Toggle Video */}
         <button
           onClick={toggleVideo}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-            isVideoOff ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-          }`}
-          title={isVideoOff ? 'Turn Video On' : 'Turn Video Off'}
+          className="flex flex-col items-center gap-1 group"
+          title={isVideoOff ? 'Start Video' : 'Stop Video'}
         >
-          {isVideoOff ? <VideoOff size={20} /> : <Video size={20} />}
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all
+            ${isVideoOff ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-white/8 text-slate-300 border border-white/10 group-hover:bg-white/15'}`}>
+            {isVideoOff ? <VideoOff size={20} /> : <Video size={20} />}
+          </div>
+          <span className="text-[9px] text-slate-500 uppercase tracking-widest">Video</span>
         </button>
 
+        {/* End Call */}
         <button
           onClick={handleEndCall}
-          className="w-16 h-16 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center transition-all shadow-red-glow"
+          className="flex flex-col items-center gap-1"
           title="End Call"
         >
-          <PhoneOff size={24} />
+          <div className="w-16 h-16 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full flex items-center justify-center transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+            <PhoneOff size={26} />
+          </div>
+          <span className="text-[9px] text-slate-500 uppercase tracking-widest">End</span>
         </button>
 
-        <button
-          onClick={toggleScreenShare}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-            isScreenSharing ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-          }`}
-          title={isScreenSharing ? 'Stop Screen Sharing' : 'Share Screen'}
-        >
-          <Monitor size={20} />
-        </button>
+        {/* Screen Share — desktop only */}
+        {!isMobile && (
+          <button
+            onClick={toggleScreenShare}
+            className="flex flex-col items-center gap-1 group"
+            title={isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all
+              ${isScreenSharing ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/40' : 'bg-white/8 text-slate-300 border border-white/10 group-hover:bg-white/15'}`}>
+              <Monitor size={20} />
+            </div>
+            <span className="text-[9px] text-slate-500 uppercase tracking-widest">Screen</span>
+          </button>
+        )}
 
-        <button
-          onClick={toggleCameraFacing}
-          className="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10"
-          title="Switch Camera (Mobile)"
-        >
-          <SwitchCamera size={20} />
-        </button>
+        {/* Flip Camera — mobile only */}
+        {isMobile && (
+          <button
+            onClick={toggleCameraFacing}
+            className="flex flex-col items-center gap-1 group"
+            title="Flip Camera"
+          >
+            <div className="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-white/8 text-slate-300 border border-white/10 group-hover:bg-white/15">
+              <SwitchCamera size={20} />
+            </div>
+            <span className="text-[9px] text-slate-500 uppercase tracking-widest">Flip</span>
+          </button>
+        )}
       </div>
     </div>
   );

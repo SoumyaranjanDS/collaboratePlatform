@@ -12,6 +12,7 @@ import adminRoutes from './routes/admin.routes.js';
 
 // Socket
 import { chatSocket } from './socket/chat.socket.js';
+import { verifyMailer } from './utils/mailer.js';
 
 dotenv.config();
 
@@ -37,4 +38,8 @@ app.set('io', io);
 chatSocket(io);
 
 const PORT = process.env.PORT || 9000;
-server.listen(PORT, () => console.log(`Production Server running on port ${PORT}`));
+server.listen(PORT, async () => {
+  console.log(`Production Server running on port ${PORT}`);
+  // Verify SMTP connection at startup — safe to fail, won't crash server
+  await verifyMailer();
+});
