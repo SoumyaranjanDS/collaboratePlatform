@@ -1,55 +1,85 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
+import { resolve4 } from 'dns/promises';
 
-// Force IPv4 to avoid ETIMEDOUT on hosting providers (Render, Railway, etc.)
-// that block IPv6 outbound connections to Gmail SMTP
+// Force IPv4 globally as a first line of defense
 dns.setDefaultResultOrder('ipv4first');
 
 let transporter = null;
+let resolvedHost = null;
 
-const createTransporter = () => {
+/**
+ * Resolve SMTP host to an IPv4 address.
+ * Render / Railway block IPv6 outbound, so we MUST connect via IPv4.
+ */
+const resolveHostIPv4 = async (hostname) => {
+  try {
+    const addresses = await resolve4(hostname);
+    if (addresses.length > 0) {
+      console.log(`[Mailer] DNS resolved ${hostname} → ${addresses[0]} (IPv4)`);
+      return addresses[0];
+    }
+  } catch (err) {
+    console.error(`[Mailer] ❌ DNS IPv4 resolve failed for ${hostname}:`, err.message);
+  }
+  return hostname; // fallback to hostname
+};
+
+/**
+ * Create the nodemailer transporter.
+ * Uses the IPv4 address directly to avoid Node.js 24 "happy eyeballs"
+ * selecting an IPv6 address that is unreachable on cloud hosts.
+ */
+const createTransporter = async () => {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const originalHost = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const secure = process.env.SMTP_SECURE !== 'false'; // default true for port 465
+  const secure = process.env.SMTP_SECURE !== 'false'; // default true for 465
 
   if (!user || !pass) {
     console.warn('[Mailer] ⚠️  SMTP_USER or SMTP_PASS not set — email will not work.');
     return null;
   }
 
+  // Resolve to IPv4 to bypass IPv6 blocks on Render
+  const host = await resolveHostIPv4(originalHost);
+  resolvedHost = host;
+
   const t = nodemailer.createTransport({
     host,
     port,
-    secure,                   // true = TLS on connect (port 465)
-    family: 4,                // ← force IPv4 socket — fixes ETIMEDOUT on Render
-    connectionTimeout: 10000, // 10s to establish TCP connection
-    greetingTimeout: 10000,   // 10s for SMTP greeting
-    socketTimeout: 30000,     // 30s idle socket timeout
+    secure,
+    family: 4,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
     auth: { user, pass },
     tls: {
-      rejectUnauthorized: false // allow self-signed certs in dev
+      servername: originalHost,     // ← use original hostname for TLS cert validation
+      rejectUnauthorized: false
     }
   });
 
-  console.log(`[Mailer] ✅ Transporter ready → ${host}:${port} (secure=${secure}, IPv4-forced)`);
+  console.log(`[Mailer] ✅ Transporter ready → ${host}:${port} (secure=${secure}, original=${originalHost})`);
   return t;
 };
 
-export const getTransporter = () => {
+/**
+ * Get or create the transporter (lazy async init).
+ */
+export const getTransporter = async () => {
   if (!transporter) {
-    transporter = createTransporter();
+    transporter = await createTransporter();
   }
   return transporter;
 };
 
 /**
- * Verify the SMTP connection on server startup.
- * Call this once from index.js so you know immediately if credentials are wrong.
+ * Verify the SMTP connection. Call from index.js at startup.
  */
 export const verifyMailer = async () => {
-  const t = getTransporter();
+  const t = await getTransporter();
   if (!t) return false;
   try {
     await t.verify();
@@ -57,22 +87,18 @@ export const verifyMailer = async () => {
     return true;
   } catch (err) {
     console.error('[Mailer] ❌ SMTP verification failed:', err.message);
-    // Reset so next call recreates the transporter
-    transporter = null;
+    transporter = null; // reset so it retries next time
     return false;
   }
 };
 
 /**
- * Send an email. Returns the nodemailer info object on success, or null on failure.
- * Never throws — errors are caught and logged so callers don't crash.
- *
- * @param {{ to: string, subject: string, html: string }} options
+ * Send an email. Never throws — errors are caught and logged.
  */
 export const sendMail = async ({ to, subject, html }) => {
-  const t = getTransporter();
+  const t = await getTransporter();
   if (!t) {
-    console.error('[Mailer] ❌ Cannot send email — transporter not initialised.');
+    console.error('[Mailer] ❌ Cannot send — transporter not initialised.');
     return null;
   }
 
@@ -87,8 +113,7 @@ export const sendMail = async ({ to, subject, html }) => {
     return info;
   } catch (err) {
     console.error(`[Mailer] ❌ Failed to send to ${to}:`, err.message);
-    // If the connection was killed, reset transporter so it reconnects next time
-    if (['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED'].includes(err.code)) {
+    if (['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'ENETUNREACH'].includes(err.code)) {
       console.warn('[Mailer] ⚠️  Resetting transporter due to connection error.');
       transporter = null;
     }

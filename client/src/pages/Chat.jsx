@@ -461,11 +461,10 @@ const Chat = ({ user, setAuth }) => {
   }, [incomingCall]);
 
   // 30-second auto-hangup timer for outgoing calls
+  // Clears automatically when isCallAccepted becomes true (peer picks up)
   useEffect(() => {
-    if (activeVideoCall && activeVideoCall.isCaller) {
+    if (activeVideoCall && activeVideoCall.isCaller && !isCallAccepted) {
       const peer = activeVideoCall.peer;
-      setCallCountdown(30);
-      setIsCallAccepted(false);
       setCallTimedOut(false);
 
       callCountdownRef.current = setInterval(() => {
@@ -489,6 +488,7 @@ const Chat = ({ user, setAuth }) => {
         setCallTimedOut(true);
       }, 30000);
     } else {
+      // Call was accepted OR no active call — clear all timers
       clearTimeout(callTimerRef.current);
       clearInterval(callCountdownRef.current);
     }
@@ -496,7 +496,7 @@ const Chat = ({ user, setAuth }) => {
       clearTimeout(callTimerRef.current);
       clearInterval(callCountdownRef.current);
     };
-  }, [activeVideoCall?.isCaller, activeVideoCall?.peer]);
+  }, [activeVideoCall?.isCaller, activeVideoCall?.peer, isCallAccepted]);
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
