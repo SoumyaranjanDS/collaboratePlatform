@@ -396,7 +396,7 @@ const AdminDashboard = () => {
           <div>
             <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
               Super Admin
-              <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-red-500 to-amber-500 text-white px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-black uppercase tracking-widest bg-linear-to-r from-red-500 to-amber-500 text-white px-2 py-0.5 rounded-md">
                 Master
               </span>
             </h1>
@@ -852,7 +852,7 @@ const AdminDashboard = () => {
                   {users.map((u) => (
                     <tr
                       key={u._id}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className="hover:bg-white/2 transition-colors"
                     >
                       <td className="py-4 pl-2 font-bold text-white">
                         <div className="flex items-center gap-3">
