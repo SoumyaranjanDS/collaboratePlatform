@@ -41,7 +41,7 @@ const Bar = ({
   unit = "%",
 }) => (
   <div>
-    <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">
+    <div className="flex justify-between text-[10px] font-bold text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-widest">
       <span>{label}</span>
       <span
         className={
@@ -56,7 +56,7 @@ const Bar = ({
         {unit}
       </span>
     </div>
-    <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
+    <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden border border-[var(--color-border-subtle)]">
       <div
         className={`h-full ${color} transition-all duration-1000 rounded-full`}
         style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
@@ -66,15 +66,15 @@ const Bar = ({
 );
 
 const StatCard = ({ icon, label, value, sub, color }) => (
-  <div className="p-5 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md flex flex-col gap-1">
+  <div className="p-5 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md flex flex-col gap-1">
     <div className={`flex items-center justify-between mb-2 ${color}`}>
       {icon}
-      <span className="text-[9px] font-black tracking-widest uppercase text-slate-500">
+      <span className="text-[9px] font-black tracking-widest uppercase text-[var(--color-text-muted)]">
         {label}
       </span>
     </div>
-    <p className="text-2xl font-black text-white">{value}</p>
-    {sub && <p className="text-[10px] text-slate-500">{sub}</p>}
+    <p className="text-2xl font-black text-[var(--color-text-primary)]">{value}</p>
+    {sub && <p className="text-[10px] text-[var(--color-text-muted)]">{sub}</p>}
   </div>
 );
 
@@ -383,24 +383,24 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#03010a] text-slate-200 font-sans p-4 md:p-8 doodle-bg relative overflow-y-auto">
+    <div className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] font-sans p-4 md:p-8 doodle-bg relative overflow-y-auto">
       {/* ── Header ── */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/chat")}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--color-bg-elevated)] border border-[var(--color-border-hover)] hover:bg-[var(--color-bg-surface)] transition-colors"
           >
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white flex items-center gap-2.5">
+            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[var(--color-text-primary)] flex items-center gap-2.5">
               Super Admin
-              <span className="text-[10px] font-black uppercase tracking-widest bg-linear-to-r from-red-500 to-amber-500 text-white px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-black uppercase tracking-widest bg-linear-to-r from-red-500 to-amber-500 text-[var(--color-text-primary)] px-2 py-0.5 rounded-md">
                 Master
               </span>
             </h1>
-            <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold">
+            <p className="text-xs text-[var(--color-text-muted)] mt-1 uppercase tracking-widest font-semibold">
               Chatify Control Center &nbsp;·&nbsp;{" "}
               {users.filter((u) => u.role !== "admin").length} registered users
             </p>
@@ -409,7 +409,7 @@ const AdminDashboard = () => {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="px-4 py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-widest flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] hover:bg-[var(--color-bg-surface)] transition-all text-xs font-bold uppercase tracking-widest flex items-center gap-2"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Sync
           Records
@@ -449,15 +449,15 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── Tab Bar ── */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-white/5 relative z-10 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-[var(--color-border-subtle)] relative z-10 scrollbar-none">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shrink-0 flex items-center gap-2 border ${
               activeTab === t.id
-                ? "bg-indigo-600 text-white border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.35)]"
-                : "bg-white/5 text-slate-400 border-white/5 hover:bg-white/10 hover:text-white"
+                ? "bg-indigo-600 text-[var(--color-text-primary)] border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.35)]"
+                : "bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-surface)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             {t.icon} {t.label}
@@ -471,8 +471,8 @@ const AdminDashboard = () => {
         {activeTab === "performance" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Live metrics */}
-            <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-              <h3 className="text-sm font-extrabold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+              <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-6 uppercase tracking-wider flex items-center gap-2">
                 <Cpu size={16} className="text-indigo-400" /> Real-Time Signal
                 Metrics
               </h3>
@@ -488,20 +488,20 @@ const AdminDashboard = () => {
                   color="bg-purple-500"
                 />
                 <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-xl bg-black/30 border border-white/5">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                  <div className="p-4 rounded-xl bg-black/30 border border-[var(--color-border-subtle)]">
+                    <span className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                       Active Call Sockets
                     </span>
-                    <p className="text-2xl font-black text-white mt-1">
+                    <p className="text-2xl font-black text-[var(--color-text-primary)] mt-1">
                       {activeConnections}
                     </p>
                   </div>
-                  <div className="p-4 rounded-xl bg-black/30 border border-white/5">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                  <div className="p-4 rounded-xl bg-black/30 border border-[var(--color-border-subtle)]">
+                    <span className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                       DB Query Latency
                     </span>
                     <p
-                      className={`text-2xl font-black mt-1 ${dbLatency > 120 ? "text-rose-400" : dbLatency > 60 ? "text-amber-400" : "text-white"}`}
+                      className={`text-2xl font-black mt-1 ${dbLatency > 120 ? "text-rose-400" : dbLatency > 60 ? "text-amber-400" : "text-[var(--color-text-primary)]"}`}
                     >
                       {dbLatency} ms
                     </p>
@@ -511,9 +511,9 @@ const AdminDashboard = () => {
             </div>
 
             {/* Health log */}
-            <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md flex flex-col justify-between">
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-extrabold text-white mb-3 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-3 uppercase tracking-wider flex items-center gap-2">
                   <Server size={16} className="text-purple-400" /> Performance
                   Health Log
                 </h3>
@@ -536,7 +536,7 @@ const AdminDashboard = () => {
                 <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">
                   Optimization Recommendation
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   {cpuUsage > 75
                     ? "CPU spike detected. Trigger load balancer or cluster scaling immediately to maintain zero delay."
                     : "Switch to Optimization tab to apply recommended improvements and watch metrics drop in real-time."}
@@ -579,24 +579,24 @@ const AdminDashboard = () => {
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="p-5 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md"
+                  className="p-5 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md"
                 >
                   <div
                     className={`flex items-center justify-between mb-3 ${s.color}`}
                   >
                     {s.icon}
-                    <span className="text-[9px] font-black tracking-widest uppercase text-slate-500">
+                    <span className="text-[9px] font-black tracking-widest uppercase text-[var(--color-text-muted)]">
                       {s.label}
                     </span>
                   </div>
-                  <p className="text-2xl font-black text-white">{s.value}</p>
+                  <p className="text-2xl font-black text-[var(--color-text-primary)]">{s.value}</p>
                 </div>
               ))}
             </div>
 
             {/* API endpoint response times */}
-            <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-              <h3 className="text-sm font-extrabold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+            <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+              <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-6 uppercase tracking-wider flex items-center gap-2">
                 <BarChart2 size={16} className="text-cyan-400" /> API Endpoint
                 Performance
               </h3>
@@ -647,8 +647,8 @@ const AdminDashboard = () => {
 
             {/* WebRTC & asset info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-                <h3 className="text-sm font-extrabold text-white mb-5 uppercase tracking-wider flex items-center gap-2">
+              <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+                <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-5 uppercase tracking-wider flex items-center gap-2">
                   <Wifi size={16} className="text-cyan-400" /> WebRTC Signal
                   Stats
                 </h3>
@@ -666,19 +666,19 @@ const AdminDashboard = () => {
                     unit="ms"
                   />
                   <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div className="p-3 rounded-xl bg-black/30 border border-white/5">
-                      <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black">
+                    <div className="p-3 rounded-xl bg-black/30 border border-[var(--color-border-subtle)]">
+                      <p className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest font-black">
                         Active Calls
                       </p>
-                      <p className="text-xl font-black text-white mt-1">
+                      <p className="text-xl font-black text-[var(--color-text-primary)] mt-1">
                         {activeConnections}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-black/30 border border-white/5">
-                      <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black">
+                    <div className="p-3 rounded-xl bg-black/30 border border-[var(--color-border-subtle)]">
+                      <p className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest font-black">
                         Avg Call Duration
                       </p>
-                      <p className="text-xl font-black text-white mt-1">
+                      <p className="text-xl font-black text-[var(--color-text-primary)] mt-1">
                         {rand(3, 12)} min
                       </p>
                     </div>
@@ -686,8 +686,8 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-                <h3 className="text-sm font-extrabold text-white mb-5 uppercase tracking-wider flex items-center gap-2">
+              <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+                <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-5 uppercase tracking-wider flex items-center gap-2">
                   <Package size={16} className="text-amber-400" /> Asset Bundle
                   Sizes
                 </h3>
@@ -743,10 +743,10 @@ const AdminDashboard = () => {
             <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 mb-2 flex items-start gap-3">
               <Zap size={18} className="text-indigo-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm font-bold text-[var(--color-text-primary)]">
                   Interactive Optimization Engine
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                   Apply recommendations below to dynamically improve system
                   performance. Each optimization reflects immediately in the
                   Performance tab metrics.
@@ -760,21 +760,21 @@ const AdminDashboard = () => {
                 return (
                   <div
                     key={opt.id}
-                    className={`p-5 rounded-2xl border backdrop-blur-md transition-all ${done ? "bg-emerald-500/5 border-emerald-500/20" : "bg-[#0c091f]/60 border-white/5 hover:border-white/10"}`}
+                    className={`p-5 rounded-2xl border backdrop-blur-md transition-all ${done ? "bg-emerald-500/5 border-emerald-500/20" : "bg-[var(--color-bg-card)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-hover)]"}`}
                   >
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 ${opt.color}`}
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-bg-elevated)] ${opt.color}`}
                         >
                           {opt.icon}
                         </div>
                         <div>
-                          <p className="text-sm font-extrabold text-white">
+                          <p className="text-sm font-extrabold text-[var(--color-text-primary)]">
                             {opt.title}
                           </p>
                           <span
-                            className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${opt.color} bg-white/5`}
+                            className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${opt.color} bg-[var(--color-bg-elevated)]`}
                           >
                             {opt.badge}
                           </span>
@@ -787,7 +787,7 @@ const AdminDashboard = () => {
                         />
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                    <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mb-4">
                       {opt.desc}
                     </p>
                     <div className="flex items-center justify-between">
@@ -816,7 +816,7 @@ const AdminDashboard = () => {
                             ? "bg-emerald-500/10 text-emerald-400 cursor-default"
                             : running
                               ? "bg-indigo-500/30 text-indigo-300 cursor-wait"
-                              : "bg-indigo-600 text-white hover:bg-indigo-500 hover:scale-105 active:scale-95 shadow-[0_0_12px_rgba(99,102,241,0.3)] disabled:opacity-40"
+                              : "bg-indigo-600 text-[var(--color-text-primary)] hover:bg-indigo-500 hover:scale-105 active:scale-95 shadow-[0_0_12px_rgba(99,102,241,0.3)] disabled:opacity-40"
                         }`}
                       >
                         {done ? "✓ Applied" : running ? "Applying…" : "Apply"}
@@ -831,15 +831,15 @@ const AdminDashboard = () => {
 
         {/* ── Users ── */}
         {activeTab === "users" && (
-          <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-            <h3 className="text-sm font-extrabold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+            <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-6 uppercase tracking-wider flex items-center gap-2">
               <Users size={16} className="text-indigo-400" /> Registered Users
               Directory
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold text-slate-400">
+              <table className="w-full text-left text-xs font-semibold text-[var(--color-text-secondary)]">
                 <thead>
-                  <tr className="border-b border-white/5 text-[10px] uppercase tracking-widest font-black text-slate-500">
+                  <tr className="border-b border-[var(--color-border-subtle)] text-[10px] uppercase tracking-widest font-black text-[var(--color-text-muted)]">
                     <th className="pb-3.5 pl-2">User</th>
                     <th className="pb-3.5">Email</th>
                     <th className="pb-3.5">Status</th>
@@ -854,9 +854,9 @@ const AdminDashboard = () => {
                       key={u._id}
                       className="hover:bg-white/2 transition-colors"
                     >
-                      <td className="py-4 pl-2 font-bold text-white">
+                      <td className="py-4 pl-2 font-bold text-[var(--color-text-primary)]">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-[var(--color-border-hover)] shrink-0">
                             <img
                               src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`}
                               alt="avatar"
@@ -865,7 +865,7 @@ const AdminDashboard = () => {
                           @{u.username}
                         </div>
                       </td>
-                      <td className="py-4 font-mono text-[11px] text-slate-400">
+                      <td className="py-4 font-mono text-[11px] text-[var(--color-text-secondary)]">
                         {u.email}
                       </td>
                       <td className="py-4">
@@ -883,7 +883,7 @@ const AdminDashboard = () => {
                       </td>
                       <td className="py-4">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${u.warnings?.length > 0 ? "bg-red-500/15 text-red-400" : "bg-white/5 text-slate-500"}`}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${u.warnings?.length > 0 ? "bg-red-500/15 text-red-400" : "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)]"}`}
                         >
                           {u.warnings?.length || 0} warns
                         </span>
@@ -895,7 +895,7 @@ const AdminDashboard = () => {
                               setTargetUser(u.username);
                               setWarningText("");
                             }}
-                            className="px-2.5 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all font-bold uppercase tracking-widest text-[9px]"
+                            className="px-2.5 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-[var(--color-text-primary)] rounded-lg transition-all font-bold uppercase tracking-widest text-[9px]"
                           >
                             Warn
                           </button>
@@ -911,13 +911,13 @@ const AdminDashboard = () => {
 
         {/* ── Reports ── */}
         {activeTab === "reports" && (
-          <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-            <h3 className="text-sm font-extrabold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+            <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-6 uppercase tracking-wider flex items-center gap-2">
               <AlertOctagon size={16} className="text-rose-400" /> Complaints &
               Reports
             </h3>
             {reports.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 font-bold uppercase tracking-widest text-xs">
+              <div className="text-center py-12 text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">
                 No pending complaints
               </div>
             ) : (
@@ -925,18 +925,18 @@ const AdminDashboard = () => {
                 {reports.map((r) => (
                   <div
                     key={r._id}
-                    className="p-5 rounded-xl bg-black/30 border border-white/5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                    className="p-5 rounded-xl bg-black/30 border border-[var(--color-border-subtle)] flex flex-col md:flex-row md:items-center md:justify-between gap-4"
                   >
                     <div>
                       <div className="flex items-center gap-2.5 mb-2">
                         <span className="text-[10px] font-black uppercase bg-rose-500/10 border border-rose-500/30 text-rose-500 px-2 py-0.5 rounded">
                           {r.status}
                         </span>
-                        <span className="text-xs text-slate-400 font-bold">
+                        <span className="text-xs text-[var(--color-text-secondary)] font-bold">
                           @{r.reporter} → @{r.reportedUser}
                         </span>
                       </div>
-                      <p className="text-sm font-semibold text-white leading-relaxed">
+                      <p className="text-sm font-semibold text-[var(--color-text-primary)] leading-relaxed">
                         {r.reason}
                       </p>
                     </div>
@@ -947,7 +947,7 @@ const AdminDashboard = () => {
                           `Complaint from @${r.reporter}: "${r.reason.slice(0, 50)}${r.reason.length > 50 ? "…" : ""}"`,
                         );
                       }}
-                      className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shrink-0"
+                      className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-[var(--color-text-primary)] rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shrink-0"
                     >
                       Warn User
                     </button>
@@ -960,24 +960,24 @@ const AdminDashboard = () => {
 
         {/* ── Feedback ── */}
         {activeTab === "feedback" && (
-          <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md">
-            <h3 className="text-sm font-extrabold text-white mb-6 uppercase tracking-wider flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md">
+            <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-6 uppercase tracking-wider flex items-center gap-2">
               <Star size={16} className="text-amber-400" /> User Feedback &
               Reviews
             </h3>
             <div className="space-y-4">
               {feedbacks.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 font-bold uppercase tracking-widest text-xs">
+                <div className="text-center py-12 text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-xs">
                   No reviews yet
                 </div>
               ) : (
                 feedbacks.map((f) => (
                   <div
                     key={f._id}
-                    className="p-5 rounded-xl bg-black/30 border border-white/5"
+                    className="p-5 rounded-xl bg-black/30 border border-[var(--color-border-subtle)]"
                   >
                     <div className="flex justify-between items-center mb-3">
-                      <span className="font-bold text-white text-sm">
+                      <span className="font-bold text-[var(--color-text-primary)] text-sm">
                         @{f.username}
                       </span>
                       <div className="flex gap-0.5">
@@ -1003,26 +1003,26 @@ const AdminDashboard = () => {
 
         {/* ── Campaigns ── */}
         {activeTab === "campaigns" && (
-          <div className="p-6 rounded-2xl bg-[#0c091f]/60 border border-white/5 backdrop-blur-md max-w-2xl">
-            <h3 className="text-sm font-extrabold text-white mb-1 uppercase tracking-wider flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] backdrop-blur-md max-w-2xl">
+            <h3 className="text-sm font-extrabold text-[var(--color-text-primary)] mb-1 uppercase tracking-wider flex items-center gap-2">
               <Mail size={16} className="text-indigo-400" /> Re-Engagement
               Marketing Blast
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed mb-6">
+            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mb-6">
               Send a pre-designed, fun email to all registered users. 22
               templates available — pick one and broadcast!
             </p>
             <div className="space-y-5">
               {/* Campaign Selector */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">
                   Select Campaign Template
                 </label>
 
                 <select
                   value={selectedCampaign}
                   onChange={(e) => setSelectedCampaign(e.target.value)}
-                  className="w-full bg-black border border-white/10 focus:border-indigo-500/50 rounded-2xl px-4 py-3 text-sm font-semibold text-white outline-none transition-all"
+                  className="w-full bg-white border border-[var(--color-border-hover)] focus:border-indigo-500/50 rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--color-text-primary)] outline-none transition-all"
                 >
                   {[
                     {
@@ -1136,17 +1136,17 @@ const AdminDashboard = () => {
                   </h4>
                 </div>
 
-                <p className="text-sm text-slate-200 italic leading-relaxed">
+                <p className="text-sm text-[var(--color-text-primary)] italic leading-relaxed">
                   {CAMPAIGN_PREVIEWS[selectedCampaign]}
                 </p>
               </motion.div>
 
               {/* Recipients */}
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                <Users size={14} className="text-slate-400" />
-                <span className="text-xs font-bold text-slate-400">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                <Users size={14} className="text-[var(--color-text-secondary)]" />
+                <span className="text-xs font-bold text-[var(--color-text-secondary)]">
                   Will be sent to{" "}
-                  <span className="text-white">
+                  <span className="text-[var(--color-text-primary)]">
                     {users.filter((u) => u.role !== "admin").length}
                   </span>{" "}
                   registered users
@@ -1156,7 +1156,7 @@ const AdminDashboard = () => {
               <button
                 onClick={handleTriggerCampaign}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white py-4 rounded-2xl font-extrabold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 shadow-[0_4px_25px_rgba(99,102,241,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
+                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-[var(--color-text-primary)] py-4 rounded-2xl font-extrabold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 shadow-[0_4px_25px_rgba(99,102,241,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
               >
                 <Send size={14} />
                 {loading ? "Sending Broadcast…" : "Send Promotional Broadcast"}
@@ -1169,13 +1169,13 @@ const AdminDashboard = () => {
       {/* ── Issue Warning Dialog ── */}
       {targetUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="bg-[#0c091f]/90 backdrop-blur-xl border border-white/10 p-8 rounded-3xl max-w-sm w-full mx-4 shadow-2xl flex flex-col relative">
+          <div className="bg-[var(--color-bg-card)]/90 backdrop-blur-xl border border-[var(--color-border-hover)] p-8 rounded-3xl max-w-sm w-full mx-4 shadow-2xl flex flex-col relative">
             <button
               onClick={() => {
                 setTargetUser("");
                 setWarningText("");
               }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             >
               <X size={20} />
             </button>
@@ -1184,22 +1184,22 @@ const AdminDashboard = () => {
                 <ShieldAlert size={18} className="text-red-500" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-white">
+                <h3 className="text-base font-extrabold text-[var(--color-text-primary)]">
                   Issue Warning
                 </h3>
-                <p className="text-xs text-slate-500">Target: @{targetUser}</p>
+                <p className="text-xs text-[var(--color-text-muted)]">Target: @{targetUser}</p>
               </div>
             </div>
             <textarea
               placeholder="Describe the violation rules breached…"
-              className="bg-black/40 border border-white/5 focus:border-indigo-500/50 rounded-2xl p-4 text-xs font-semibold text-white w-full h-24 outline-none placeholder:text-slate-700 resize-none mb-4"
+              className="bg-black/40 border border-[var(--color-border-subtle)] focus:border-indigo-500/50 rounded-2xl p-4 text-xs font-semibold text-[var(--color-text-primary)] w-full h-24 outline-none placeholder:text-slate-700 resize-none mb-4"
               value={warningText}
               onChange={(e) => setWarningText(e.target.value)}
             />
             <button
               onClick={() => handleWarnUser(targetUser)}
               disabled={!warningText.trim()}
-              className="py-3 bg-red-600 hover:bg-red-500 disabled:opacity-30 text-white rounded-2xl transition-all font-bold text-xs uppercase tracking-wider"
+              className="py-3 bg-red-600 hover:bg-red-500 disabled:opacity-30 text-[var(--color-text-primary)] rounded-2xl transition-all font-bold text-xs uppercase tracking-wider"
             >
               Issue Warning
             </button>

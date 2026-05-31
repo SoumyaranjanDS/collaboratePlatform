@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { sendMail } from '../utils/mailer.js';
 
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
 export const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -14,10 +16,21 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username, email, password: hashedPassword });
-    res.status(201).json({ user: { id: newUser._id, username: newUser.username } });
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    
+    const newUser = await User.create({ 
+      username, 
+      email, 
+      password: hashedPassword,
+      otp,
+      otpExpires
+    });
+
+    await sendMail(email, "Welcome to Chatify - Verification Code", `Your verification code is: ${otp}`);
+    res.status(201).json({ status: 'OTP_REQUIRED', email: newUser.email, message: "Verification code sent to email" });
   } catch (error) {
-    res.status(400).json({ error: "User already exists" });
+    res.status(400).json({ error: "User already exists or server error" });
   }
 };
 
@@ -44,42 +57,15 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
+    
     if (await bcrypt.compare(password, user.password)) {
-      // Predefined Admin OTP logic
-      if (user.role === 'admin') {
-        user.otp = '999999';
-        user.otpExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour validity
-        await user.save();
-        return res.json({ status: 'OTP_SENT', message: 'Predefined Admin login OTP activated.' });
-      }
-
-      // Generate 6-digit OTP for regular users
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otp = generateOTP();
       user.otp = otp;
-      user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
+      user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
       await user.save();
-
-      // Log OTP to server console as a fallback
-      console.log(`[OTP] Generated code for ${user.email} (${user.username}): ${otp}`);
-
-      // Send OTP to email asynchronously (non-blocking)
-      sendMail({
-        to: user.email,
-        subject: 'Your Chatify Access Code',
-        html: `
-          <div style="font-family: sans-serif; background-color: #0b0c10; color: #c5c6c7; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid #1f2833;">
-            <h2 style="color: #66fcf1; text-transform: uppercase; letter-spacing: 2px;">Chatify</h2>
-            <p>Hello <strong>@${user.username}</strong>,</p>
-            <p>Please use the verification code below to complete your login session:</p>
-            <div style="background-color: #1f2833; color: #66fcf1; font-size: 32px; font-weight: bold; text-align: center; padding: 15px; border-radius: 8px; margin: 25px 0; border: 1px dashed #66fcf1; letter-spacing: 4px;">
-              ${otp}
-            </div>
-            <p style="font-size: 12px; color: #45a29e;">This code will expire in 5 minutes. Do not share this code with anyone.</p>
-          </div>
-        `
-      }).catch(err => console.error('[Mailer] Async OTP email sending failed:', err));
- 
-      res.json({ status: 'OTP_SENT', message: 'Verification code sent to your email.' });
+      
+      await sendMail(email, "Chatify - Login Verification", `Your verification code is: ${otp}`);
+      return res.json({ status: 'OTP_REQUIRED', email: user.email, message: "Verification code sent to email" });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
     }

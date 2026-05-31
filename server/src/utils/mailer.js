@@ -16,7 +16,7 @@ const resolveHostIPv4 = async (hostname) => {
   try {
     const addresses = await resolve4(hostname);
     if (addresses.length > 0) {
-      console.log(`[Mailer] DNS resolved ${hostname} → ${addresses[0]} (IPv4)`);
+      // DNS resolved
       return addresses[0];
     }
   } catch (err) {
@@ -61,7 +61,7 @@ const createTransporter = async () => {
     }
   });
 
-  console.log(`[Mailer] ✅ Transporter ready → ${host}:${port} (secure=${secure}, original=${originalHost})`);
+  // Transporter ready
   return t;
 };
 
@@ -83,7 +83,7 @@ export const verifyMailer = async () => {
   if (!t) return false;
   try {
     await t.verify();
-    console.log('[Mailer] ✅ SMTP connection verified successfully');
+    // SMTP connection verified successfully
     return true;
   } catch (err) {
     console.error('[Mailer] ❌ SMTP verification failed:', err.message);
@@ -109,7 +109,7 @@ export const sendMail = async ({ to, subject, html }) => {
       subject,
       html
     });
-    console.log(`[Mailer] ✅ Email sent → ${to} (messageId: ${info.messageId})`);
+    // Email sent
     return info;
   } catch (err) {
     console.error(`[Mailer] ❌ Failed to send to ${to}:`, err.message);

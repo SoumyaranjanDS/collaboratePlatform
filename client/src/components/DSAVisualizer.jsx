@@ -36,12 +36,12 @@ const StackViz = () => {
 
   return (
     <div className="flex flex-col items-center gap-4 h-full">
-      <div className="flex gap-2 w-full max-w-xs">
+      <div className="flex gap-2 flex-wrap w-full max-w-sm justify-center">
         <input value={inputVal} onChange={e => setInputVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && push()}
-          placeholder="Value..." className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-accent-indigo" />
-        <button onClick={push} className="px-3 py-2 bg-accent-indigo/20 text-accent-indigo text-[10px] font-black uppercase rounded-lg hover:bg-accent-indigo/30 transition-all">Push</button>
-        <button onClick={pop} className="px-3 py-2 bg-accent-red/20 text-accent-red text-[10px] font-black uppercase rounded-lg hover:bg-accent-red/30 transition-all">Pop</button>
-        <button onClick={peek} className="px-3 py-2 bg-white/5 text-slate-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-all">Peek</button>
+          placeholder="Value..." className="w-24 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-2 text-[var(--text-sm)] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-primary)]" />
+        <button onClick={push} className="px-3 py-2 bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Push</button>
+        <button onClick={pop} className="px-3 py-2 bg-[rgba(232,108,108,0.1)] text-[var(--color-functional-danger)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Pop</button>
+        <button onClick={peek} className="px-3 py-2 bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:bg-[var(--color-bg-card)] transition-all border border-[var(--color-border-subtle)]">Peek</button>
       </div>
 
       <p className="text-[10px] font-bold text-slate-500 text-center h-4">{message}</p>
@@ -52,10 +52,10 @@ const StackViz = () => {
         <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">Bottom</span>
 
         {items.map((item, i) => (
-          <div key={i} className={`w-full py-2.5 rounded-xl text-center text-sm font-black transition-all duration-300 ${
+          <div key={i} className={`w-full py-2.5 rounded-xl text-center text-[var(--text-sm)] font-black transition-all duration-300 ${
             highlight === i 
-              ? (i === items.length - 1 ? 'bg-accent-indigo text-white scale-105 shadow-[0_0_20px_rgba(99,102,241,0.4)]' : 'bg-accent-red text-white')
-              : 'bg-white/10 text-slate-300 border border-white/5'
+              ? (i === items.length - 1 ? 'bg-[var(--color-accent-primary)] text-white scale-105 shadow-[var(--shadow-sm)]' : 'bg-[var(--color-functional-danger)] text-white')
+              : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)]'
           }`}
             style={{ animation: highlight === i ? 'slideDown 0.3s ease-out' : 'none' }}
           >
@@ -98,11 +98,11 @@ const QueueViz = () => {
 
   return (
     <div className="flex flex-col items-center gap-4 h-full">
-      <div className="flex gap-2 w-full max-w-xs">
+      <div className="flex gap-2 flex-wrap w-full max-w-sm justify-center">
         <input value={inputVal} onChange={e => setInputVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && enqueue()}
-          placeholder="Value..." className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-accent-indigo" />
-        <button onClick={enqueue} className="px-3 py-2 bg-accent-indigo/20 text-accent-indigo text-[10px] font-black uppercase rounded-lg hover:bg-accent-indigo/30 transition-all">Enqueue</button>
-        <button onClick={dequeue} className="px-3 py-2 bg-accent-red/20 text-accent-red text-[10px] font-black uppercase rounded-lg hover:bg-accent-red/30 transition-all">Dequeue</button>
+          placeholder="Value..." className="w-24 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-2 text-[var(--text-sm)] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-primary)]" />
+        <button onClick={enqueue} className="px-3 py-2 bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Enqueue</button>
+        <button onClick={dequeue} className="px-3 py-2 bg-[rgba(232,108,108,0.1)] text-[var(--color-functional-danger)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Dequeue</button>
       </div>
 
       <p className="text-[10px] font-bold text-slate-500 text-center h-4">{message}</p>
@@ -111,10 +111,10 @@ const QueueViz = () => {
         {items.length > 0 && <span className="text-[8px] text-accent-indigo font-black uppercase shrink-0">Front →</span>}
         
         {items.map((item, i) => (
-          <div key={i} className={`shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-300 ${
+          <div key={i} className={`shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-[var(--text-sm)] font-black transition-all duration-300 ${
             highlight === i 
-              ? (i === 0 ? 'bg-accent-red text-white scale-110 shadow-[0_0_20px_rgba(255,77,77,0.4)]' : 'bg-accent-indigo text-white scale-110 shadow-[0_0_20px_rgba(99,102,241,0.4)]')
-              : 'bg-white/10 text-slate-300 border border-white/5'
+              ? (i === 0 ? 'bg-[var(--color-functional-danger)] text-white scale-110 shadow-[var(--shadow-sm)]' : 'bg-[var(--color-accent-primary)] text-white scale-110 shadow-[var(--shadow-sm)]')
+              : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)]'
           }`}>
             {item}
           </div>
@@ -174,10 +174,10 @@ const ArrayViz = () => {
     <div className="flex flex-col items-center gap-4 h-full">
       <div className="flex gap-2 w-full max-w-sm flex-wrap justify-center">
         <input value={inputVal} onChange={e => setInputVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && insertEnd()}
-          placeholder="Number..." className="w-20 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-accent-indigo" />
-        <button onClick={insertEnd} className="px-3 py-2 bg-accent-indigo/20 text-accent-indigo text-[10px] font-black uppercase rounded-lg hover:bg-accent-indigo/30 transition-all">Insert</button>
-        <button onClick={removeLast} className="px-3 py-2 bg-accent-red/20 text-accent-red text-[10px] font-black uppercase rounded-lg hover:bg-accent-red/30 transition-all">Remove</button>
-        <button onClick={linearSearch} className="px-3 py-2 bg-white/5 text-slate-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-all">Search</button>
+          placeholder="Number..." className="w-20 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-2 text-[var(--text-sm)] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-primary)]" />
+        <button onClick={insertEnd} className="px-3 py-2 bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Insert</button>
+        <button onClick={removeLast} className="px-3 py-2 bg-[rgba(232,108,108,0.1)] text-[var(--color-functional-danger)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all">Remove</button>
+        <button onClick={linearSearch} className="px-3 py-2 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:bg-[var(--color-bg-card)] transition-all">Search</button>
       </div>
 
       <p className="text-[10px] font-bold text-slate-500 text-center h-4">{message}</p>
@@ -185,10 +185,10 @@ const ArrayViz = () => {
       <div className="flex-1 flex items-center justify-center gap-1.5 w-full overflow-x-auto px-4 [&::-webkit-scrollbar]:hidden">
         {items.map((item, i) => (
           <div key={i} className="flex flex-col items-center gap-1 shrink-0">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-300 ${
-              highlight === i ? 'bg-green-500/30 text-green-400 scale-110 shadow-[0_0_20px_rgba(34,197,94,0.4)] border-2 border-green-500'
-              : comparing === i ? 'bg-yellow-500/20 text-yellow-400 scale-105 border-2 border-yellow-500/50'
-              : 'bg-white/10 text-slate-300 border border-white/5'
+            <div className={`w-14 h-14 rounded-[var(--radius-md)] flex items-center justify-center text-[var(--text-sm)] font-black transition-all duration-300 ${
+              highlight === i ? 'bg-[rgba(93,187,138,0.2)] text-[var(--color-functional-success)] scale-110 shadow-[var(--shadow-sm)] border-2 border-[var(--color-functional-success)]'
+              : comparing === i ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] scale-105 border-2 border-[var(--color-accent-primary)]'
+              : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)]'
             }`}>
               {item}
             </div>
@@ -278,14 +278,14 @@ const SortingViz = () => {
     <div className="flex flex-col items-center gap-4 h-full">
       <div className="flex gap-2 flex-wrap justify-center">
         <select value={algorithm} onChange={e => setAlgorithm(e.target.value)} disabled={sorting}
-          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none">
+          className="bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-2 text-[var(--text-sm)] text-[var(--color-text-primary)] outline-none">
           <option value="bubble">Bubble Sort</option>
           <option value="selection">Selection Sort</option>
         </select>
-        <button onClick={startSort} disabled={sorting} className="px-3 py-2 bg-accent-indigo/20 text-accent-indigo text-[10px] font-black uppercase rounded-lg hover:bg-accent-indigo/30 transition-all disabled:opacity-30 flex items-center gap-1">
+        <button onClick={startSort} disabled={sorting} className="px-3 py-2 bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:opacity-80 transition-all disabled:opacity-30 flex items-center gap-1">
           <Play size={12} /> Play
         </button>
-        <button onClick={reset} className="px-3 py-2 bg-white/5 text-slate-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-all flex items-center gap-1">
+        <button onClick={reset} className="px-3 py-2 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] text-[var(--text-xs)] font-black uppercase rounded-lg hover:bg-[var(--color-bg-card)] transition-all flex items-center gap-1">
           <RotateCcw size={12} /> Reset
         </button>
       </div>
@@ -294,10 +294,10 @@ const SortingViz = () => {
 
       <div className="flex-1 flex items-end justify-center gap-[3px] w-full px-4">
         {items.map((val, i) => (
-          <div key={i} className={`flex-1 max-w-4 rounded-t-md transition-all duration-100 ${
-            sorted.includes(i) ? 'bg-green-500/60'
-            : comparing.includes(i) ? 'bg-accent-indigo shadow-[0_0_8px_rgba(99,102,241,0.5)]'
-            : 'bg-white/15'
+          <div key={i} className={`flex-1 max-w-4 rounded-t-[var(--radius-sm)] transition-all duration-100 ${
+            sorted.includes(i) ? 'bg-[var(--color-functional-success)]'
+            : comparing.includes(i) ? 'bg-[var(--color-accent-primary)] shadow-[var(--shadow-sm)]'
+            : 'bg-gray-300'
           }`}
             style={{ height: `${(val / maxVal) * 100}%`, minHeight: '4px' }}
           />
@@ -320,24 +320,24 @@ const DSAVisualizer = ({ onClose }) => {
   const ActiveComponent = visualizers.find(v => v.id === activeViz)?.component;
 
   return (
-    <div className="flex flex-col h-full bg-dark-bg text-slate-200 animate-slide-up">
+    <div className="flex flex-col h-full bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] animate-spring-in font-sans">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers size={18} className="text-green-400" />
-          <h2 className="text-sm font-black uppercase tracking-widest">Visualizer</h2>
+          <Layers size={18} className="text-[var(--color-accent-primary)]" />
+          <h2 className="text-[var(--text-sm)] font-black uppercase tracking-widest text-[var(--color-text-primary)]">Visualizer</h2>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-all">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] transition-all">
           <X size={16} />
         </button>
       </div>
 
       {/* DS Selector Tabs */}
-      <div className="px-4 py-3 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-white/5">
+      <div className="px-4 py-3 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-[var(--color-border-subtle)]">
         {visualizers.map(v => (
           <button key={v.id} onClick={() => setActiveViz(v.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-              activeViz === v.id ? 'bg-green-500/20 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.15)]' : 'bg-white/5 text-slate-500 hover:text-white'
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[var(--text-xs)] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+              activeViz === v.id ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)]' : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
             }`}>
             <v.icon size={12} />
             {v.name}

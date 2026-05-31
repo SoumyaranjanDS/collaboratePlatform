@@ -106,42 +106,42 @@ const CodeEditor = ({ onClose, onSendToChat, initialCode }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-dark-bg text-slate-200 animate-slide-up">
+    <div className="flex flex-col h-full bg-[#1E1E2E] text-slate-200 animate-spring-in font-sans">
       {/* Header */}
-      <div className="px-4 py-2.5 border-b border-white/5 flex items-center justify-between shrink-0">
+      <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <Terminal size={16} className="text-emerald-400" />
-          <h2 className="text-xs font-black uppercase tracking-widest">Code Runner</h2>
-          <span className="text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">JS</span>
+          <Terminal size={16} className="text-[#A6E22E]" />
+          <h2 className="text-[var(--text-xs)] font-bold uppercase tracking-widest text-slate-100">Code Runner</h2>
+          <span className="text-[10px] bg-[#A6E22E]/20 text-[#A6E22E] px-2 py-0.5 rounded-full font-bold font-mono">JS</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={sendCodeToChat} className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-all" title="Send code to chat">
-            <Code2 size={14} />
+          <button onClick={sendCodeToChat} className="p-1.5 rounded-[var(--radius-sm)] hover:bg-white/10 text-slate-400 hover:text-white transition-all" title="Send code to chat">
+            <Code2 size={16} />
           </button>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-all">
-            <X size={14} />
+          <button onClick={onClose} className="p-1.5 rounded-[var(--radius-sm)] hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+            <X size={16} />
           </button>
         </div>
       </div>
 
       {/* Run Bar */}
-      <div className="px-4 py-2 flex items-center gap-2 border-b border-white/5 shrink-0">
+      <div className="px-4 py-2 flex items-center gap-2 border-b border-white/10 shrink-0">
         <button
           onClick={runCode}
           disabled={isRunning}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-30"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-[var(--radius-sm)] bg-[#A6E22E]/20 hover:bg-[#A6E22E]/30 text-[#A6E22E] text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-30"
         >
           <Play size={12} fill="currentColor" /> Run
         </button>
         <button
           onClick={clearOutput}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all"
         >
           <Trash2 size={12} /> Clear
         </button>
         {output.length > 0 && (
-          <button onClick={copyOutput} className="p-1.5 rounded-lg hover:bg-white/5 text-slate-600 hover:text-white transition-all ml-auto" title="Copy output">
-            <Copy size={12} />
+          <button onClick={copyOutput} className="p-1.5 rounded-[var(--radius-sm)] hover:bg-white/10 text-slate-400 hover:text-white transition-all ml-auto" title="Copy output">
+            <Copy size={14} />
           </button>
         )}
       </div>
@@ -156,11 +156,11 @@ const CodeEditor = ({ onClose, onSendToChat, initialCode }) => {
           onMount={handleEditorMount}
           theme="vs-dark"
           options={{
-            fontSize: 13,
-            fontFamily: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, monospace",
+            fontSize: 14,
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
             fontLigatures: true,
             minimap: { enabled: false },
-            padding: { top: 12, bottom: 12 },
+            padding: { top: 16, bottom: 16 },
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             tabSize: 2,
@@ -178,21 +178,21 @@ const CodeEditor = ({ onClose, onSendToChat, initialCode }) => {
       </div>
 
       {/* Output Terminal */}
-      <div className="shrink-0 border-t border-white/5 max-h-[35%] overflow-y-auto bg-[#0a0c10]">
-        <div className="px-3 py-1.5 border-b border-white/5 flex items-center gap-2 sticky top-0 bg-[#0a0c10] z-10">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Output</span>
+      <div className="shrink-0 border-t border-white/10 max-h-[35%] overflow-y-auto bg-[#181825]">
+        <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2 sticky top-0 bg-[#181825] z-10">
+          <div className="w-2 h-2 rounded-full bg-[#A6E22E] animate-pulse" />
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Output</span>
         </div>
-        <div className="p-3 space-y-1 font-mono text-xs">
+        <div className="p-4 space-y-1.5 font-mono text-[var(--text-sm)]">
           {output.length === 0 && !error && (
-            <span className="text-slate-700 text-[11px]">Click "Run" to execute your code...</span>
+            <span className="text-slate-500">Click "Run" to execute your code...</span>
           )}
           {output.map((log, i) => (
             <div key={i} className={`whitespace-pre-wrap leading-relaxed ${
-              log.type === 'error' ? 'text-red-400' 
-              : log.type === 'warn' ? 'text-yellow-400'
-              : log.type === 'info' ? 'text-emerald-400/70'
-              : 'text-slate-300'
+              log.type === 'error' ? 'text-[#F92672]' 
+              : log.type === 'warn' ? 'text-[#FD971F]'
+              : log.type === 'info' ? 'text-[#66D9EF]'
+              : 'text-slate-200'
             }`}>
               {log.text}
             </div>

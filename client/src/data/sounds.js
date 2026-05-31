@@ -18,7 +18,7 @@ export const unlockAudio = () => {
     node.buffer = buffer;
     node.connect(ctx.destination);
     node.start(0);
-    console.log('[Sounds] AudioContext unlocked successfully');
+    // AudioContext unlocked successfully
   } catch (err) {
     console.warn('[Sounds] AudioContext unlock failed:', err);
   }
@@ -43,7 +43,7 @@ export const playSendSound = () => {
     osc.start();
     osc.stop(ctx.currentTime + 0.1);
   } catch (err) {
-    console.log('[Sounds] Send sound blocked:', err);
+    // Send sound blocked
   }
 };
 
@@ -74,7 +74,7 @@ export const playReceiveSound = () => {
     osc2.start(now + 0.07);
     osc2.stop(now + 0.07 + 0.16);
   } catch (err) {
-    console.log('[Sounds] Receive sound blocked:', err);
+    // Receive sound blocked
   }
 };
 
@@ -110,7 +110,7 @@ export const playCallingSound = () => {
       osc1.stop(now + 1.0);
       osc2.stop(now + 1.0);
     } catch (err) {
-      console.log('[Sounds] Ringtone chime blocked:', err);
+      // Ringtone chime blocked
     }
   };
   
@@ -155,6 +155,6 @@ export const playHangupSound = () => {
     osc.start(now);
     osc.stop(now + 0.22);
   } catch (err) {
-    console.log('[Sounds] Hangup sound blocked:', err);
+    // Hangup sound blocked
   }
 };

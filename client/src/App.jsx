@@ -7,7 +7,6 @@ import { playReceiveSound, unlockAudio } from './data/sounds';
 import { useEffect } from 'react';
 
 // Import Pages
-import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
@@ -23,7 +22,7 @@ function AnimatedRoutes({ auth, setAuth }) {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={auth ? <Chat user={auth} setAuth={setAuth} /> : <Navigate to="/login" />} />
         <Route path="/login" element={<Login setAuth={setAuth} />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/docs" element={<Docs />} />
