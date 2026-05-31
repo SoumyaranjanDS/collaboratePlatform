@@ -6,7 +6,7 @@ import { playCallingSound, playHangupSound } from '../data/sounds';
 const isMobileDevice = () =>
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onCallEnded }) => {
+const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onCallEnded, bufferedCandidates = [] }) => {
   const [localStream, setLocalStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
@@ -118,6 +118,18 @@ const VideoCall = ({ socket, currentUser, peerUser, isCaller, incomingOffer, onC
           if (!isMounted) { pc.close(); return; }
           await pc.setLocalDescription(answer);
           socket.emit('call-accepted', { to: peerUser, answer });
+          
+          // Apply any ICE candidates that were received while the phone was ringing
+          if (bufferedCandidates && bufferedCandidates.length > 0) {
+            console.log(`[WebRTC] Applying ${bufferedCandidates.length} buffered candidates`);
+            for (const candidate of bufferedCandidates) {
+              try {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+              } catch (e) {
+                console.error('Error adding buffered ICE candidate:', e);
+              }
+            }
+          }
         }
 
         if (!isMounted) {

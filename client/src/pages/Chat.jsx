@@ -256,6 +256,9 @@ const Chat = ({ user, setAuth }) => {
   // Admin warning
   const [showAdminWarning, setShowAdminWarning] = useState(false);
   const [adminWarningText, setAdminWarningText] = useState('');
+
+  // Buffer early ICE candidates received before VideoCall mounts
+  const [bufferedCandidates, setBufferedCandidates] = useState([]);
   // Report user
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState('');
@@ -355,10 +358,16 @@ const Chat = ({ user, setAuth }) => {
 
     socket.on('incoming-call', ({ from, offer }) => {
       setIncomingCall({ from, offer });
+      setBufferedCandidates([]); // Reset buffer for new call
       if (incomingCallAudioRef.current) {
         incomingCallAudioRef.current.pause();
       }
       incomingCallAudioRef.current = playCallIncomingSound();
+    });
+
+    socket.on('ice-candidate', ({ candidate }) => {
+      // Buffer the candidate if the call hasn't been accepted yet
+      setBufferedCandidates(prev => [...prev, candidate]);
     });
 
     // Clear auto-hangup timer when peer accepts the call
@@ -415,6 +424,7 @@ const Chat = ({ user, setAuth }) => {
       socket.off('message-reaction-update');
       socket.off('messages-read');
       socket.off('incoming-call');
+      socket.off('ice-candidate');
       socket.off('call-accepted');
       socket.off('call-rejected');
       socket.off('end-call');
@@ -817,6 +827,7 @@ const Chat = ({ user, setAuth }) => {
             peerUser={activeVideoCall.peer}
             isCaller={activeVideoCall.isCaller}
             incomingOffer={activeVideoCall.offer}
+            bufferedCandidates={bufferedCandidates}
             onCallEnded={() => {
               clearTimeout(callTimerRef.current);
               clearInterval(callCountdownRef.current);
