@@ -27,7 +27,7 @@ export const signup = async (req, res) => {
       otpExpires
     });
 
-    await sendMail(email, "Welcome to Chatify - Verification Code", `Your verification code is: ${otp}`);
+    await sendMail({ to: email, subject: "Welcome to Chatify - Verification Code", html: `Your verification code is: ${otp}` });
     res.status(201).json({ status: 'OTP_REQUIRED', email: newUser.email, message: "Verification code sent to email" });
   } catch (error) {
     res.status(400).json({ error: "User already exists or server error" });
@@ -64,7 +64,7 @@ export const login = async (req, res) => {
       user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
       await user.save();
       
-      await sendMail(email, "Chatify - Login Verification", `Your verification code is: ${otp}`);
+      await sendMail({ to: email, subject: "Chatify - Login Verification", html: `Your verification code is: ${otp}` });
       return res.json({ status: 'OTP_REQUIRED', email: user.email, message: "Verification code sent to email" });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
