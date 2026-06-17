@@ -42,9 +42,14 @@ export const signup = async (req, res) => {
     if(!username || !email || !password){
       return res.status(400).json({ error: "All fields are required" });
     }
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ error: "User already exists" });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ error: "Email is already registered" });
+    }
+
+    const existingUsername = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+    if (existingUsername) {
+      return res.status(400).json({ error: "Username is already taken. Please choose another one." });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOTP();
