@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Loader2, ChevronRight, MessageSquare } from 'lucide-react';
+import { User, Mail, Lock, Loader2, ChevronRight, MessageSquare, AlertCircle } from 'lucide-react';
 
 const Signup = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -119,6 +119,13 @@ const Signup = () => {
                 />
               </div>
               <p className="text-xs text-[var(--color-text-secondary)] mt-2">Code sent to {savedEmail}</p>
+              
+              <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2 text-amber-700">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <p className="text-xs leading-relaxed">
+                  Please check your <strong>Spam</strong> folder if you don't see the email. It is completely safe.
+                </p>
+              </div>
             </div>
           )}
 
