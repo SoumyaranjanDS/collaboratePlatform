@@ -213,7 +213,7 @@ const Chat = ({ user, setAuth }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [onlineList, setOnlineList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(location.state?.initialMode === 'personal');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isWhiteboardActive, setIsWhiteboardActive] = useState(false);
   const [activePanel, setActivePanel] = useState(location.state?.initialPanel || null);
   const [toolMode, setToolMode] = useState('collaborative');
@@ -259,7 +259,7 @@ const Chat = ({ user, setAuth }) => {
   const [reportReason, setReportReason] = useState('');
   const [reportTarget, setReportTarget] = useState('');
 
-  const rightPaneVisible = selectedChat || activePanel || isWhiteboardActive;
+  const rightPaneVisible = !isSidebarOpen;
   // Ask for notification permission and unlock AudioContext on user interaction
   useEffect(() => {
     if (Notification.permission === 'default') {
@@ -666,23 +666,23 @@ const Chat = ({ user, setAuth }) => {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                <button onClick={() => { setActivePanel(null); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${!activePanel && !isWhiteboardActive ? 'bg-[var(--color-accent-primary)] text-[var(--color-text-on-accent)] shadow-[var(--shadow-sm)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
-                  <Globe size={20} /> <span className="font-semibold text-[var(--text-sm)]">Home Chat</span>
+                <button onClick={() => { setActivePanel(null); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setIsSidebarOpen(false); setSelectedChat(null); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${!activePanel && !isWhiteboardActive && !selectedChat ? 'bg-[var(--color-accent-primary)] text-[var(--color-text-on-accent)] shadow-[var(--shadow-sm)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
+                  <Globe size={20} /> <span className="font-semibold text-[var(--text-sm)]">Global Chat</span>
                 </button>
-                <button onClick={() => { setActivePanel('editor'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
+                <button onClick={() => { setActivePanel('editor'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setIsSidebarOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePanel === 'editor' ? 'bg-[#A6E22E]/20 text-[#A6E22E] border border-[#A6E22E]/30' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
                   <Terminal size={20} /> <span className="font-semibold text-[var(--text-sm)]">Code Editor</span>
                 </button>
-                <button onClick={() => { setActivePanel('visualizer'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
+                <button onClick={() => { setActivePanel('visualizer'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setIsSidebarOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePanel === 'visualizer' ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] border border-[var(--color-accent-secondary)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
                   <Layers size={20} /> <span className="font-semibold text-[var(--text-sm)]">DSA Visualizer</span>
                 </button>
-                <button onClick={() => { setIsWhiteboardActive(true); setActivePanel(null); setIsMobileMenuOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
+                <button onClick={() => { setIsWhiteboardActive(true); setActivePanel(null); setIsMobileMenuOpen(false); setIsSidebarOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isWhiteboardActive ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] border border-[var(--color-accent-secondary)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
                   <PenTool size={20} /> <span className="font-semibold text-[var(--text-sm)]">Whiteboard</span>
                 </button>
-                <button onClick={() => { setActivePanel('templates'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
+                <button onClick={() => { setActivePanel('templates'); setIsWhiteboardActive(false); setIsMobileMenuOpen(false); setIsSidebarOpen(false); setToolMode(selectedChat ? 'collaborative' : 'personal'); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePanel === 'templates' ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-primary)] border border-[var(--color-accent-secondary)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]'}`}>
                   <Code2 size={20} /> <span className="font-semibold text-[var(--text-sm)]">Templates</span>
                 </button>
@@ -717,7 +717,7 @@ const Chat = ({ user, setAuth }) => {
       <div className={`${!rightPaneVisible ? 'hidden md:flex' : 'flex'} flex-1 flex-col min-w-0 relative bg-[var(--color-bg-base)]`}>
         <header className="h-16 px-4 md:px-6 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0 bg-[var(--color-bg-surface)] z-10">
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <button onClick={() => { setSelectedChat(null); setActivePanel(null); setIsWhiteboardActive(false); }} className="md:hidden text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors p-1 -ml-1">
+            <button onClick={() => { setIsSidebarOpen(true); }} className="md:hidden text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors p-1 -ml-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <div className="flex flex-col min-w-0">
